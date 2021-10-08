@@ -1,0 +1,278 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{NLP Quiz 1}
+\author{Alvaro Faundez}
+\date{October 2021}
+
+\usepackage{amsmath}
+\usepackage{pgfplots}
+\pgfplotsset{width=10cm,compat=1.9}
+\usepackage{float}
+\usepackage{graphicx}
+\usetikzlibrary{calc,angles,quotes}
+\usepackage{makecell}
+
+\newcommand\given[1][]{\:#1\vert\:}
+
+\begin{document}
+
+\maketitle
+
+\section*{Question 1}
+
+\paragraph{Write out the joint probability for the following sentence using the chain rule:}
+
+\begin{equation*}
+    p(\text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}, \text{not}, \text{ordinary})
+\end{equation*}
+
+\paragraph{Write out the probability above using the second-order Markov assumption.}
+
+\subsection*{Answer}
+
+\subsubsection*{Using the chain rule:}
+
+\begin{equation*}
+    \begin{split}
+    P(\text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}, \text{not}, \text{ordinary}) =\ & P(\text{There}) \times \\
+    & P(\text{is} \given \text{There}) \times \\
+    & P(\text{only} \given \text{There}, \text{is} ) \times \\
+    & P(\text{one} \given \text{There}, \text{is}, \text{only}) \times \\
+    & P(\text{person} \given \text{There}, \text{is}, \text{only}, \text{one}) \times \\
+    & P(\text{who} \given \text{There}, \text{is}, \text{only}, \text{one}, \text{person}) \times \\
+    & P(\text{is} \given \text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who} \times \\
+    & P(\text{not}, \given \text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}) \times \\
+    & P(\text{ordinary} \given \text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}, \text{not})
+    \end{split}
+\end{equation*}
+
+\subsubsection*{Using the second-order Markov assumption:}
+
+\begin{equation*}
+    \begin{split}
+    P(\text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}, \text{not}, \text{ordinary})) =\ & P(\text{There}) \times \\
+    & P(\text{is} \given \text{There}) \times \\
+    & P(\text{only} \given \text{There}, \text{is} ) \times \\
+    & P(\text{one} \given \text{is}, \text{only}) \times \\
+    & P(\text{person} \given  \text{only}, \text{one}) \times \\
+    & P(\text{who} \given , \text{one}, \text{person}) \times \\
+    & P(\text{is} \given \text{person}, \text{who} \times \\
+    & P(\text{not}, \given \text{who}, \text{is}) \times \\
+    & P(\text{ordinary}) \given \text{is}, \text{not})
+    \end{split}
+\end{equation*}
+
+\clearpage
+
+\section*{Question 2}
+
+\paragraph{Consider the following training corpus T of sentences:}
+
+\begin{itemize}
+    \item START Karlsson is round STOP
+    \item START He lives on the roof STOP
+    \item START He is happy STOP
+    \item START On the roof STOP
+    \item START Karlsson lives happily STOP
+\end{itemize}
+
+\paragraph{(b) Compute the following maximum likelihood parameters:}
+
+\begin{equation*}
+    \begin{split}
+    p(\text{Karlsson} \given \text{START})=\\
+    p(\text{Karlsson} \given \text{lives, happily})=\\
+    p(\text{STOP}|\text{happy})=
+    \end{split}
+\end{equation*}
+
+\paragraph{(c) Compute the probability of the following sentences under the trigram model trained on T:}
+
+\begin{equation*}
+    \begin{split}
+    &\text{START Karlsson is happy STOP}\\
+    &\text{START Karlsson lives on the roof STOP}
+    \end{split}
+\end{equation*}
+
+\subsection*{Answer}
+
+\subsubsection*{(b)}
+
+\begin{equation*}
+    \begin{split}
+    p(\text{Karlsson} \given \text{START}) = \frac{c(START, Karlsson)}{c(START)} = \frac{2}{5}
+    \end{split}
+\end{equation*}
+
+\begin{equation*}
+    \begin{split}
+    p(\text{Karlsson} \given \text{lives, happily}) = \frac{c(lives, happily, Karlsson)}{c(lives, happily)} = \frac{0}{1}
+    \end{split}
+\end{equation*}
+
+
+\begin{equation*}
+    \begin{split}
+    p(\text{STOP} \given \text{happy}) = \frac{c(happy, STOP)}{c(happy)} = \frac{1}{1}
+    \end{split}
+\end{equation*}
+
+\subsubsection*{(c)}
+
+\paragraph{Sentence "START START Karlsson is happy STOP"}
+
+\begin{equation*}
+    \begin{split}
+    p(\text{START Karlsson is happy STOP}) =&\ P(Karlsson \given START, START) \times \\
+    & P(is \given START, Karlsson) \times \\
+    & P(happy \given Karlson, is) \times \\
+    & P(STOP \given is, happy)
+    \end{split}
+\end{equation*}
+
+The probabilities needed are (adding an extra start to each sentence):
+
+\begin{equation*}
+    \begin{split}
+    P(Karlsson \given START, START) = \frac{c(START, START, Karlsson)}{ c(START, START)} = \frac{2}{5}
+    \end{split}
+\end{equation*}
+
+\begin{equation*}
+    \begin{split}
+    P(is \given START, Karlsson) = \frac{c(START, Karlsson, is)}{ c(START, Karlson)} = \frac{1}{2}
+    \end{split}
+\end{equation*}
+
+\begin{equation*}
+    \begin{split}
+    P(happy \given Karlson, is) = \frac{c(Karlsson, is, happy)}{ c(Karlson, is)} = \frac{0}{1}
+    \end{split}
+\end{equation*}
+
+\begin{equation*}
+    \begin{split}
+    P(STOP \given is, happy) = \frac{c(is, happy, STOP)}{c(is, happy)} = \frac{1}{1}
+    \end{split}
+\end{equation*}
+
+Then, 
+
+\begin{equation*}
+    \begin{split}
+    p(\text{START Karlsson is happy STOP}) =\frac{2}{5} \times \frac{1}{2} \times \frac{0}{1} \times \frac{1}{1} = 0
+    \end{split}
+\end{equation*}
+
+\paragraph{Sentence "START START Karlsson lives on the roof STOP"}
+
+\begin{equation*}
+    \begin{split}
+    p(\text{START START Karlsson lives on the roof STOP}) =&\ P(Karlsson \given START, START) \times \\
+    & P(lives \given START, Karlsson) \times \\
+    & P(on \given Karlsson, lives) \times \\
+    & P(the \given lives, on) \times \\
+    & P(roof \given on, the) \times \\
+    & P(STOP \given the, roof)
+    \end{split}
+\end{equation*}
+
+The probabilities needed are (adding an extra start to each sentence):
+
+\begin{equation*}
+    \begin{split}
+    P(Karlsson \given START, START) = \frac{c(START, START, Karlsson)}{ c(START, START)} = \frac{2}{5}
+    \end{split}
+\end{equation*}
+
+\begin{equation*}
+    \begin{split}
+    P(lives \given START, Karlsson) = \frac{c(START, Karlsson, lives)}{ c(START, Karlsson)} = \frac{1}{2}
+    \end{split}
+\end{equation*}
+
+\begin{equation*}
+    \begin{split}
+    P(on \given Karlsson, lives) = \frac{c(Karlsson, lives, on)}{ c( Karlsson, lives)} = \frac{0}{1}
+    \end{split}
+\end{equation*}
+
+\begin{equation*}
+    \begin{split}
+    P(the \given lives, on) = \frac{c(lives, on, the)}{ c(lives, on)} = \frac{1}{1}
+    \end{split}
+\end{equation*}
+
+\begin{equation*}
+    \begin{split}
+    P(roof \given on, the) = \frac{c(on, the, roof)}{ c(on, the)} = \frac{1}{2}
+    \end{split}
+\end{equation*}
+
+\begin{equation*}
+    \begin{split}
+    P(STOP \given the, roof) = \frac{c(the, roof, STOP)}{ c(the, roof)} = \frac{2}{2}
+    \end{split}
+\end{equation*}
+
+
+\begin{equation*}
+    \begin{split}
+    p(\text{START START Karlsson lives on the roof STOP}) = \frac{1}{2} \times \frac{0}{1} \times \frac{1}{1} \times \frac{1}{2} \times \frac{2}{2} = 0
+    \end{split}
+\end{equation*}
+
+
+
+
+
+
+\clearpage
+
+\section*{Question 3}
+\paragraph{We have the following training corpus:}
+
+\begin{equation*}
+    \begin{split}
+    &\text{the green book STOP}\\
+    &\text{my blue book STOP}\\
+    &\text{his green house STOP}\\
+    &\text{book STOP}
+    \end{split}
+\end{equation*}
+
+
+\paragraph{Assume we have a language model based on this corpus using linear interpolation with $\lambda_i = 1 / 3$ for all $i$. Compute the value of the parameter $p(book--the\ green)$ under this model. Assume STOP as part of your unigram model.}
+
+\begin{equation*}
+p(book\given the\ green)
+\end{equation*}
+
+\subsection*{Answer}
+
+
+\begin{equation*}
+p(book \given the, green) = \lambda_1 \times p_{ML}(book \given the, green ) + \lambda_2 \times p_{ML}(book \given green) + \lambda_3 \times p_{ML}(book)
+\end{equation*}
+
+\begin{equation*}
+ p_{ML}(book \given the, green ) = \frac{c(the, green, book)}{c(the, green)} = \frac{1}{1}
+\end{equation*}
+
+\begin{equation*}
+ p_{ML}(book \given green ) = \frac{c(green, book)}{c(green)} = \frac{1}{2}
+\end{equation*}
+
+\begin{equation*}
+ p_{ML}(book ) = \frac{c(book)}{c()} = \frac{3}{14}
+\end{equation*}
+
+Then,
+
+\begin{equation*}
+p(book \given the green) = (\frac{1}{3} \times 1) + (\frac{1}{3} \times \frac{1}{2}) + (\frac{1}{3} \times \frac{3}{14}) = \frac{1}{3} + \frac{1}{6} + \frac{1}{14} = 0.57142857142
+\end{equation*}
+
+\end{document}
