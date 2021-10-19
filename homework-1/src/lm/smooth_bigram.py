@@ -14,7 +14,7 @@ class SmoothBigramModel(BigramModel):
         vocab_size = len(self.unigrams.keys())
         conditionalProbability = (bigramCount + 1) / (unigramCount + vocab_size)
         if log:
-            conditionalProbability = math.log(conditionalProbability) if conditionalProbability > 0 else -math.inf
+            conditionalProbability = math.log(conditionalProbability, 2) if conditionalProbability > 0 else -math.inf
         steps = [
             'P(\\texttt{' + condition + '} \mid \\texttt{' + word + '})',
             '\\frac{count^{*}(\\texttt{' + condition + '} , \\texttt{' + word + '}) + 1}{count(' + condition + ') + |V|}',
@@ -24,5 +24,5 @@ class SmoothBigramModel(BigramModel):
             steps = [ '\log_{2} (' + step + ')' for step in steps ]
         steps.append(conditionalProbability)
         if verbose:
-            print(steps[0] + ' &= ', ' = '.join([ str(step) for step in steps[1:] ]), ' \\\\')
+            print(steps[0] + ' =&\\ ', ' = '.join([ str(step) for step in steps[1:] ]), ' \\\\')
         return steps

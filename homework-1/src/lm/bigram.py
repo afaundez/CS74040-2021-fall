@@ -1,9 +1,8 @@
 import math
 from .unigram import UnigramModel
 from .corpus import sentenceToWords, pairwise
-
 class BigramModel(UnigramModel):
-    def __init__(self, unigrams, bigrams, ignoreWords={'<s>'}):
+    def __init__(self, unigrams, bigrams, ignoreWords={}):
         super().__init__(unigrams, ignoredWords=ignoreWords)
         self.bigrams = bigrams
     
@@ -27,13 +26,13 @@ class BigramModel(UnigramModel):
             steps = [ '\log_{2} (' + step + ')' for step in steps ]
         steps.append(conditionalProbability)
         if verbose:
-            print(steps[0] + ' &= ', ' = '.join([ str(step) for step in steps[1:] ]), ' \\\\')
+            print(steps[0] + ' =&\\ ', ' = '.join([ str(step) for step in steps[1:] ]), ' \\\\')
         return steps
 
     def sentenceMLE(self, sentence, log=False, verbose=False):
         if verbose:
             print("\\begin{equation}\\begin{split}")
-            print('S &= \\texttt{' + sentence + '} \\\\')
+            print('S =&\\ \\texttt{' + sentence + '} \\\\')
         
         words = sentenceToWords(sentence, knownWords=set(self.unigrams.keys()), ignoreWords=self.ignoredWords)
 
@@ -53,6 +52,6 @@ class BigramModel(UnigramModel):
         steps.append(sentenceProbability)
 
         if verbose:
-            print(steps[0], '&=', ' &= '.join([f'{step} \\\\' for step in steps[1:]]))
+            print(steps[0], '&=', ' =&\\ '.join([f'{step} \\\\' for step in steps[1:]]))
             print("\\end{split}\\end{equation}")
         return steps
