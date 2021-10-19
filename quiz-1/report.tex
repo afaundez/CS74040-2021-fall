@@ -24,7 +24,15 @@
 \paragraph{Write out the joint probability for the following sentence using the chain rule:}
 
 \begin{equation*}
-    p(\text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}, \text{not}, \text{ordinary})
+    p(\text{There}
+\text{is}
+\text{only}
+\text{one}
+\text{person}
+\text{who}
+\text{is}
+\text{not}
+\text{ordinary})
 \end{equation*}
 
 \paragraph{Write out the probability above using the second-order Markov assumption.}
@@ -35,15 +43,52 @@
 
 \begin{equation*}
     \begin{split}
-    P(\text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}, \text{not}, \text{ordinary}) =\ & P(\text{There}) \times \\
+    P(\text{There}
+\text{is}
+\text{only}
+\text{one}
+\text{person}
+\text{who}
+\text{is}
+\text{not}
+\text{ordinary}) =\ & P(\text{There}) \times \\
     & P(\text{is} \given \text{There}) \times \\
-    & P(\text{only} \given \text{There}, \text{is} ) \times \\
-    & P(\text{one} \given \text{There}, \text{is}, \text{only}) \times \\
-    & P(\text{person} \given \text{There}, \text{is}, \text{only}, \text{one}) \times \\
-    & P(\text{who} \given \text{There}, \text{is}, \text{only}, \text{one}, \text{person}) \times \\
-    & P(\text{is} \given \text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who} \times \\
-    & P(\text{not}, \given \text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}) \times \\
-    & P(\text{ordinary} \given \text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}, \text{not})
+    & P(\text{only} \given \text{There}
+\text{is} ) \times \\
+    & P(\text{one} \given \text{There}
+\text{is}
+\text{only}) \times \\
+    & P(\text{person} \given \text{There}
+\text{is}
+\text{only}
+\text{one}) \times \\
+    & P(\text{who} \given \text{There}
+\text{is}
+\text{only}
+\text{one}
+\text{person}) \times \\
+    & P(\text{is} \given \text{There}
+\text{is}
+\text{only}
+\text{one}
+\text{person}
+\text{who} \times \\
+    & P(\text{not}
+\given \text{There}
+\text{is}
+\text{only}
+\text{one}
+\text{person}
+\text{who}
+\text{is}) \times \\
+    & P(\text{ordinary} \given \text{There}
+\text{is}
+\text{only}
+\text{one}
+\text{person}
+\text{who}
+\text{is}
+\text{not})
     \end{split}
 \end{equation*}
 
@@ -51,15 +96,32 @@
 
 \begin{equation*}
     \begin{split}
-    P(\text{There}, \text{is}, \text{only}, \text{one}, \text{person}, \text{who}, \text{is}, \text{not}, \text{ordinary})) =\ & P(\text{There}) \times \\
+    P(\text{There}
+\text{is}
+\text{only}
+\text{one}
+\text{person}
+\text{who}
+\text{is}
+\text{not}
+\text{ordinary})) =\ & P(\text{There}) \times \\
     & P(\text{is} \given \text{There}) \times \\
-    & P(\text{only} \given \text{There}, \text{is} ) \times \\
-    & P(\text{one} \given \text{is}, \text{only}) \times \\
-    & P(\text{person} \given  \text{only}, \text{one}) \times \\
-    & P(\text{who} \given , \text{one}, \text{person}) \times \\
-    & P(\text{is} \given \text{person}, \text{who} \times \\
-    & P(\text{not}, \given \text{who}, \text{is}) \times \\
-    & P(\text{ordinary}) \given \text{is}, \text{not})
+    & P(\text{only} \given \text{There}
+\text{is} ) \times \\
+    & P(\text{one} \given \text{is}
+\text{only}) \times \\
+    & P(\text{person} \given  \text{only}
+\text{one}) \times \\
+    & P(\text{who} \given 
+\text{one}
+\text{person}) \times \\
+    & P(\text{is} \given \text{person}
+\text{who} \times \\
+    & P(\text{not}
+\given \text{who}
+\text{is}) \times \\
+    & P(\text{ordinary}) \given \text{is}
+\text{not})
     \end{split}
 \end{equation*}
 
@@ -82,7 +144,8 @@
 \begin{equation*}
     \begin{split}
     p(\text{Karlsson} \given \text{START})=\\
-    p(\text{Karlsson} \given \text{lives, happily})=\\
+    p(\text{Karlsson} \given \text{lives
+happily})=\\
     p(\text{STOP}|\text{happy})=
     \end{split}
 \end{equation*}
@@ -102,20 +165,26 @@
 
 \begin{equation*}
     \begin{split}
-    p(\text{Karlsson} \given \text{START}) = \frac{c(START, Karlsson)}{c(START)} = \frac{2}{5}
+    p(\text{Karlsson} \given \text{START}) = \frac{c(START
+Karlsson)}{c(START)} = \frac{2}{5}
     \end{split}
 \end{equation*}
 
 \begin{equation*}
     \begin{split}
-    p(\text{Karlsson} \given \text{lives, happily}) = \frac{c(lives, happily, Karlsson)}{c(lives, happily)} = \frac{0}{1}
+    p(\text{Karlsson} \given \text{lives
+happily}) = \frac{c(lives
+happily
+Karlsson)}{c(lives
+happily)} = \frac{0}{1}
     \end{split}
 \end{equation*}
 
 
 \begin{equation*}
     \begin{split}
-    p(\text{STOP} \given \text{happy}) = \frac{c(happy, STOP)}{c(happy)} = \frac{1}{1}
+    p(\text{STOP} \given \text{happy}) = \frac{c(happy
+STOP)}{c(happy)} = \frac{1}{1}
     \end{split}
 \end{equation*}
 
@@ -125,10 +194,14 @@
 
 \begin{equation*}
     \begin{split}
-    p(\text{START Karlsson is happy STOP}) =&\ P(Karlsson \given START, START) \times \\
-    & P(is \given START, Karlsson) \times \\
-    & P(happy \given Karlson, is) \times \\
-    & P(STOP \given is, happy)
+    p(\text{START Karlsson is happy STOP}) =&\ P(Karlsson \given START
+START) \times \\
+    & P(is \given START
+Karlsson) \times \\
+    & P(happy \given Karlson
+is) \times \\
+    & P(STOP \given is
+happy)
     \end{split}
 \end{equation*}
 
@@ -136,29 +209,46 @@ The probabilities needed are (adding an extra start to each sentence):
 
 \begin{equation*}
     \begin{split}
-    P(Karlsson \given START, START) = \frac{c(START, START, Karlsson)}{ c(START, START)} = \frac{2}{5}
+    P(Karlsson \given START
+START) = \frac{c(START
+START
+Karlsson)}{ c(START
+START)} = \frac{2}{5}
     \end{split}
 \end{equation*}
 
 \begin{equation*}
     \begin{split}
-    P(is \given START, Karlsson) = \frac{c(START, Karlsson, is)}{ c(START, Karlson)} = \frac{1}{2}
+    P(is \given START
+Karlsson) = \frac{c(START
+Karlsson
+is)}{ c(START
+Karlson)} = \frac{1}{2}
     \end{split}
 \end{equation*}
 
 \begin{equation*}
     \begin{split}
-    P(happy \given Karlson, is) = \frac{c(Karlsson, is, happy)}{ c(Karlson, is)} = \frac{0}{1}
+    P(happy \given Karlson
+is) = \frac{c(Karlsson
+is
+happy)}{ c(Karlson
+is)} = \frac{0}{1}
     \end{split}
 \end{equation*}
 
 \begin{equation*}
     \begin{split}
-    P(STOP \given is, happy) = \frac{c(is, happy, STOP)}{c(is, happy)} = \frac{1}{1}
+    P(STOP \given is
+happy) = \frac{c(is
+happy
+STOP)}{c(is
+happy)} = \frac{1}{1}
     \end{split}
 \end{equation*}
 
-Then, 
+Then
+
 
 \begin{equation*}
     \begin{split}
@@ -170,12 +260,18 @@ Then,
 
 \begin{equation*}
     \begin{split}
-    p(\text{START START Karlsson lives on the roof STOP}) =&\ P(Karlsson \given START, START) \times \\
-    & P(lives \given START, Karlsson) \times \\
-    & P(on \given Karlsson, lives) \times \\
-    & P(the \given lives, on) \times \\
-    & P(roof \given on, the) \times \\
-    & P(STOP \given the, roof)
+    p(\text{START START Karlsson lives on the roof STOP}) =&\ P(Karlsson \given START
+START) \times \\
+    & P(lives \given START
+Karlsson) \times \\
+    & P(on \given Karlsson
+lives) \times \\
+    & P(the \given lives
+on) \times \\
+    & P(roof \given on
+the) \times \\
+    & P(STOP \given the
+roof)
     \end{split}
 \end{equation*}
 
@@ -183,37 +279,61 @@ The probabilities needed are (adding an extra start to each sentence):
 
 \begin{equation*}
     \begin{split}
-    P(Karlsson \given START, START) = \frac{c(START, START, Karlsson)}{ c(START, START)} = \frac{2}{5}
+    P(Karlsson \given START
+START) = \frac{c(START
+START
+Karlsson)}{ c(START
+START)} = \frac{2}{5}
     \end{split}
 \end{equation*}
 
 \begin{equation*}
     \begin{split}
-    P(lives \given START, Karlsson) = \frac{c(START, Karlsson, lives)}{ c(START, Karlsson)} = \frac{1}{2}
+    P(lives \given START
+Karlsson) = \frac{c(START
+Karlsson
+lives)}{ c(START
+Karlsson)} = \frac{1}{2}
     \end{split}
 \end{equation*}
 
 \begin{equation*}
     \begin{split}
-    P(on \given Karlsson, lives) = \frac{c(Karlsson, lives, on)}{ c( Karlsson, lives)} = \frac{0}{1}
+    P(on \given Karlsson
+lives) = \frac{c(Karlsson
+lives
+on)}{ c( Karlsson
+lives)} = \frac{0}{1}
     \end{split}
 \end{equation*}
 
 \begin{equation*}
     \begin{split}
-    P(the \given lives, on) = \frac{c(lives, on, the)}{ c(lives, on)} = \frac{1}{1}
+    P(the \given lives
+on) = \frac{c(lives
+on
+the)}{ c(lives
+on)} = \frac{1}{1}
     \end{split}
 \end{equation*}
 
 \begin{equation*}
     \begin{split}
-    P(roof \given on, the) = \frac{c(on, the, roof)}{ c(on, the)} = \frac{1}{2}
+    P(roof \given on
+the) = \frac{c(on
+the
+roof)}{ c(on
+the)} = \frac{1}{2}
     \end{split}
 \end{equation*}
 
 \begin{equation*}
     \begin{split}
-    P(STOP \given the, roof) = \frac{c(the, roof, STOP)}{ c(the, roof)} = \frac{2}{2}
+    P(STOP \given the
+roof) = \frac{c(the
+roof
+STOP)}{ c(the
+roof)} = \frac{2}{2}
     \end{split}
 \end{equation*}
 
@@ -254,15 +374,22 @@ p(book\given the\ green)
 
 
 \begin{equation*}
-p(book \given the, green) = \lambda_1 \times p_{ML}(book \given the, green ) + \lambda_2 \times p_{ML}(book \given green) + \lambda_3 \times p_{ML}(book)
+p(book \given the
+green) = \lambda_1 \times p_{ML}(book \given the
+green ) + \lambda_2 \times p_{ML}(book \given green) + \lambda_3 \times p_{ML}(book)
 \end{equation*}
 
 \begin{equation*}
- p_{ML}(book \given the, green ) = \frac{c(the, green, book)}{c(the, green)} = \frac{1}{1}
+ p_{ML}(book \given the
+green ) = \frac{c(the
+green
+book)}{c(the
+green)} = \frac{1}{1}
 \end{equation*}
 
 \begin{equation*}
- p_{ML}(book \given green ) = \frac{c(green, book)}{c(green)} = \frac{1}{2}
+ p_{ML}(book \given green ) = \frac{c(green
+book)}{c(green)} = \frac{1}{2}
 \end{equation*}
 
 \begin{equation*}
