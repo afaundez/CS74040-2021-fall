@@ -11,13 +11,15 @@ python3 part_i.py
 python3 part_ii.py
 ```
 
+There is also a notebook with everything running.
+
 ## Models
 
 To use a model, first you need to load a corpus and process the grams:
 
 ```python
 from model import filenameToCorpora, processGrams
-corpora = filenameToCorpora('../train.txt', startToken='<s>', stopToken='</s>', unknownToken='<unk>', unknownWords=[])
+corpora = filenameToCorpora('../data/train.txt', startToken='<s>', stopToken='</s>', unknownToken='<unk>', unknownWords=[])
 unigrams, bigrams = processGrams(corpora)
 ```
 
