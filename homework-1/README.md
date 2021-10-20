@@ -3,7 +3,7 @@
 Be sure of run everything with python 3.
 
 ## HW answers
-All the answers for the homework are at `part_i.py` and `part_ii.py`. They output mostly LaTeX code.
+All the answers for the homework are at `part_i.py` and `part_ii.py`. They output mostly LaTeX code, so it could be difficult to read as plain text, but readable in a tex file in an tex editor (see report.tex).
 
 ```sh
 cd homework-1/src
