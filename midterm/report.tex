@@ -1,0 +1,373 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{NLP Midterm Exam}
+\author{Álvaro Faúndez}
+\date{November 2021}
+
+\usepackage{amsmath}
+\usepackage{pgfplots}
+\pgfplotsset{width=10cm,compat=1.9}
+\usepackage{float}
+\usepackage{graphicx}
+\usetikzlibrary{calc,angles,quotes}
+\usepackage{makecell}
+
+\newcommand\given[1][]{\:#1\vert\:}
+
+\begin{document}
+
+\maketitle
+
+\section*{Question 1}
+
+\paragraph{We have a vocabulary V of size 300. How many parameters will you have to estimate for:}
+
+\begin{enumerate}
+    \item an MLE unigram language model
+    \item a bigram language model with add-one smoothing
+    \item a maximum likelihood trigram language model
+\end{enumerate}
+
+\subsection*{Answer}
+
+\begin{enumerate}
+    \item an MLE unigram language model:
+
+        It needs to estimate $|V| = 300$ parameters.
+
+    \item a bigram language model with add-one smoothing
+    
+        It needs to estimate $|V|^2 = 300^2$ parameters.
+
+    \item a maximum likelihood trigram language model
+    
+        It needs to estimate $|V|^3 = 300^3$ parameters.
+
+\end{enumerate}
+
+\clearpage
+
+\section*{Question 2}
+
+\paragraph{} Consider the following training corpus T of sentences:
+
+\begin{enumerate}
+    \item \texttt{<s> I am Sam </s>}
+    \item \texttt{<s> Sam I am </s>}
+    \item \texttt{<s> I do not like green eggs and ham </s>}
+\end{enumerate}
+
+\paragraph{} Compute the following maximum likelihood parameters:
+
+\begin{itemize}
+    \item $p(\texttt{I} \given \texttt{<s>})=$
+    \item $p(\texttt{</s>} \given \texttt{Sam})=$
+    \item $p(\texttt{I} \given \texttt{do})=$
+    \item $p(\texttt{ham} \given \texttt{eggs},\texttt{and})=$
+\end{itemize}
+
+\subsection*{Answer}
+
+\begin{equation}
+    p(\texttt{I} \given \texttt{<s>}) = \frac{count(\texttt{<s> I})}{count(\texttt{<s>})} = \frac{2}{3}
+\end{equation}
+
+\begin{equation}
+    p(\texttt{</s>} \given \texttt{Sam}) = \frac{count(\texttt{Sam </s>})}{count(\texttt{Sam})} = \frac{1}{2}
+\end{equation}
+
+\begin{equation}
+    p(\texttt{I} \given \texttt{do}) = \frac{count(\texttt{do I})}{count(\texttt{do})} = \frac{0}{1}
+\end{equation}
+
+\begin{equation}
+    p(\texttt{ham} \given \texttt{eggs},\texttt{and}) = \frac{count(\texttt{eggs and ham})}{count(\texttt{eggs and})} = \frac{1}{1}
+\end{equation}
+
+\clearpage
+
+\section*{Question 3}
+
+\paragraph{We have the following training corpus:}
+
+\begin{enumerate}
+    \item \texttt{the green book STOP}
+    \item \texttt{my blue book STOP}
+    \item \texttt{his green house STOP}
+    \item \texttt{book STOP}
+\end{enumerate}
+
+\paragraph{} Assume we have a trigram language model with linear interpolation based on this corpus, with $\lambda_i = \frac{1}{3}$ for all $i$. Compute the value of the parameter $p(\texttt{book} \given \texttt{the, green})$ under this model. Assume \texttt{STOP} as part of your unigram model.
+
+\subsection*{Answer}
+
+\paragraph{} The corpus $C$ has 14 tokens. The probabilities needed are:
+
+\begin{equation}
+p_{ML}(\texttt{book} \given \texttt{the green}) = \frac{count(\texttt{the green book})}{count(\texttt{the green})} = \frac{1}{1}
+\end{equation}
+
+\begin{equation}
+p_{ML}(\texttt{book} \given \texttt{green})  = \frac{count(\texttt{green book})}{count(\texttt{green})} = \frac{1}{2}
+\end{equation}
+
+\begin{equation}
+ p_{ML}(\texttt{book}) = \frac{count(\texttt{book})}{|C|} = \frac{3}{14}
+\end{equation}
+
+\paragraph{} Finally, the interpolation
+
+\begin{equation}
+\begin{split}
+    p(\texttt{book} \given \texttt{the green}) &= \lambda_3 \times p_{ML}(\texttt{book} \given \texttt{the green}) + \lambda_2 \times p_{ML}(\texttt{book} \given \texttt{green}) + \lambda_1 \times p_{ML}(\texttt{book})  \\
+    &= \frac{1}{3} \times \frac{count(\texttt{the green book})}{count(\texttt{the green})} + \frac{1}{3} \times \frac{count(\texttt{green book})}{count(\texttt{green})} + \frac{1}{3} \times \frac{count(\texttt{book})}{|C|} \\
+    &= \frac{1}{3} (\frac{1}{1} + \frac{1}{2} +  \frac{3}{14}) \\
+    &= 0.57142857142
+\end{split}
+\end{equation}
+
+\clearpage
+
+
+\section*{Question 4}
+
+\paragraph{} Given a vocabulary $V$ of size $1000$ and a tag set $T$ of size $30$, suppose you wish to train a bigram HMM tagger. How many transition and emission parameters will your model have? Explain.
+
+\subsection*{Answer}
+
+\paragraph{} The emissions probabilities in a bigram HMM $e(w \given t)$ are needed for all $w in V$ and each $t in T$. That means that there are $|V| \times |T| = 1000 \times 30 = 30000$ possible combinations of words and tags.
+
+\paragraph{} The transitions probabilities in a bigram HMM $p(t_i \given t_k)$ are needed for each possible combination of two transitions. That means there are $|T| \times |T| = 30 \times 30 = 900$ possible combinations of transitions pairs.
+
+\paragraph{} In the WSJ corpus example we reviewed in class, the transitions matrix also included the start token \texttt{<s>}. That would make the transitions matrix $31 \times 30 = 930$. If we also include the stop token \texttt{</s>}, the size would be $31 \times 31 = 961$. The emissions would stay the same.
+
+\clearpage
+
+\section*{Question 5}
+
+\paragraph{} Let $V = \{ Karlsson,lives,happily \}$ Let $T = \{ N,V \}$
+
+\paragraph{} We have a trigram HMM tagger that has the following non-zero parameters (all other parameters are zero):
+
+\paragraph{} Transition parameters:
+
+\begin{itemize}
+    \item $p(N \given START) = 0.5$
+    \item $p(V \given START) = 0.5$
+    \item $p(N \given START,N) = 1.0$
+    \item $p(N \given START,V) = 0.9$
+    \item $p(V \given START,V) = 0.1$
+    \item $p(STOP \given N,N) = 1.0$
+    \item $p(STOP \given V,V) = 1.0$
+    \item $p(STOP \given V,N) = 1.0$
+    \item $p(s \given u,v) = 0$ for all other p parameters
+\end{itemize}
+
+\paragraph{} Emission parameters:
+
+\begin{itemize}
+    \item $e(Karlsson \given N) = 0.8$
+    \item $e(happily \given N) = 0.2$
+    \item $e(lives \given V) = 0.7$
+    \item $e(happily \given V) = 0.3$
+\end{itemize}
+
+\paragraph{} Under this model, how many pairs of sequences $x_1 \dots x_n , y_1 \dots y_n$ have non-zero probability $p(x_1, \dots x_n , y_1 \dots y_{n+1}) \ge 0$? Show all of these possible sequences.
+
+\subsection*{Answer}
+
+\paragraph{} Given the emissions:
+
+\begin{tabular}{c|c|c|c}
+    $e(w \given t)$ & \texttt{Karlsson} & \texttt{lives} & \texttt{happily}\\
+     \hline
+    N & 0.8 & 0 & 0.8 \\
+    V & 0 & 0.7 & 0.7
+\end{tabular}
+
+\paragraph{} We can deduce that the possible $N$ are \texttt{Karlsson} and \texttt{happily} and the possible $V$ are \texttt{lives} and \texttt{happily}.
+
+\paragraph{} And from the transitions, we can deduce:
+
+\begin{itemize}
+    \item then sentences can start either with an N or a V
+    \begin{itemize}
+        \item If the sentence starts with an N, the only possibility for the next word is another N
+        \item If the sentence starts with a V, the only possibility for the next word is another N or V
+    \end{itemize}
+    \item Since there are no transitions involving a combination of only N or V, the STOP must come after two words
+\end{itemize}
+
+\paragraph{} That means that the only sequences with non-zero probabilities are:
+
+\begin{itemize}
+    \item $(t_1, t_2, t_3) = (N, N, STOP)$
+        \begin{itemize}
+            \item $(x_1, x_2, x_3) = (\texttt{Karlsson}, \texttt{Karlsson}, \texttt{STOP})$
+            \item $(x_1, x_2, x_3) = (\texttt{Karlsson}, \texttt{happily}, \texttt{STOP})$
+            \item $(x_1, x_2, x_3) = (\texttt{happily}, \texttt{happily}, \texttt{STOP})$
+            \item $(x_1, x_2, x_3) = (\texttt{happily}, \texttt{Karlsson}, \texttt{STOP})$
+        \end{itemize}
+    \item $(t_1, t_2, t_3) = (V, N, STOP)$
+        \begin{itemize}
+            \item $(x_1, x_2, x_3) = (\texttt{lives}, \texttt{Karlsson}, \texttt{STOP})$
+            \item $(x_1, x_2, x_3) = (\texttt{lives}, \texttt{happily}, \texttt{STOP})$
+            \item $(x_1, x_2, x_3) = (\texttt{happily}, \texttt{Karlsson}, \texttt{STOP})$
+            \item $(x_1, x_2, x_3) = (\texttt{hapilly}, \texttt{happily}, \texttt{STOP})$
+        \end{itemize}
+    \item $(t_1, t_2, t_3) = (V, V, STOP)$
+        \begin{itemize}
+            \item $(x_1, x_2, x_3) = (\texttt{lives}, \texttt{lives}, \texttt{STOP})$
+            \item $(x_1, x_2, x_3) = (\texttt{lives}, \texttt{happily}, \texttt{STOP})$
+            \item $(x_1, x_2, x_3) = (\texttt{happily}, \texttt{lives}, \texttt{STOP})$
+            \item $(x_1, x_2, x_3) = (\texttt{happily}, \texttt{happily}, \texttt{STOP})$
+        \end{itemize}
+\end{itemize}
+
+\paragraph{} That makes a total of 12 possible sequences of words and tags with non-zero probabilities.
+
+\clearpage
+
+\section*{Question 6}
+
+\paragraph{} Find one tagging error in each of the following sentences that are tagged with the Penn Treebank tagset:
+
+\begin{enumerate}
+    \item I/PRP need/VBP a/DT flight/NN from/IN Atlanta/NN
+    \item Does/VBZ this/DT flight/NN serve/V B dinner/NNS
+    \item I/PRP have/VB a/DT friend/NN living/VBG in/IN Denver/NNP
+    \item Can/VBP you/PRP list/VB the/DT nonstop/JJ afternoon/NN flights/NNS
+\end{enumerate}
+
+\subsection*{Answer}
+
+\begin{enumerate}
+    \item Atlanta should be NNP (proper noun, singular)
+    \item Dinner should be an NN (noun, singular or mass)
+    \item have should be a VBP (Verb, non-3rd ps. sing. present)
+    \item afternoon should be a JJ (adjective)
+\end{enumerate}
+
+\clearpage
+
+\section*{Question 7}
+
+\paragraph{} We have a vocabulary $V = \{\texttt{Hello}\}$ and a constant $N \ge 1$. For any $x_1 \dots x_n$ such that $x_i \in V$ for $i = \dots (n-1)$ and $x_n = STOP$, we define
+
+\begin{equation*}
+p(x_1, \dots, x_n) = \begin{cases}
+       \frac{1}{N} & \text{if $n \le N$} \\
+       0 & \text{otherwise} \\ 
+     \end{cases}
+\end{equation*}
+
+\paragraph{Is this a valid language model? Explain.}
+
+\subsection*{Answer}
+
+\paragraph{} In order to be valid, given a corpus C a language model must:
+
+\begin{enumerate}
+    \item $p(s) \ge 0$ for each sentence $s \in C$
+    \item $\Sigma_{s \in C} p(s) = 1$
+\end{enumerate}
+
+\paragraph{Condition 1}: it is satisfied for each sentence because the two options are zero or a positive rational.
+
+\paragraph{Condition 2}: it's not fullfilled. The probability function means that any sentence shorter or equal than $N$ has probability $\frac{1}{N}$ and everything else zero. We can see that choosing $N = 3$. There are only two sentences possible shorter or equal than 3:
+
+\begin{enumerate}
+    \item $x_1, x_2 = \texttt{Hello}, STOP$
+    \item $x_1, x_2, x_3 = \texttt{Hello}, \texttt{Hello}, STOP$
+\end{enumerate}
+
+\paragraph{} Those sentences have both a probability of $\frac{1}{3}$ and any other sentence has probability zero because they are longer than $N=3$. This way, the sum of the probabilities is $\frac{2}{3}$ and not $1$ as required to be a valid language model.
+
+\clearpage
+
+\section*{Question 8}
+
+\paragraph{} Now we have a vocabulary $V = \{\texttt{Hello}, \texttt{Goodbye}\}$ and a constant $N \ge 1$. For any $x_1 \dots x_n$ such that $x_i \in V$ for $i = \dots (n-1)$ and $x_n = STOP$, we define
+
+\begin{equation*}
+p(x_1, \dots, x_n) = \begin{cases}
+       \frac{1}{2} & \text{if $n = 2$} \\
+       0 & \text{otherwise} \\ 
+     \end{cases}
+\end{equation*}
+
+\paragraph{Is this a valid language model? Explain.}
+
+\subsection*{Answer}
+
+The difference with question 8 is in the probability function. Now, the probability function means that every sentence of size $2$ has probability $\frac{1}{2}$ and everything else zero. We can see that choosing any $N$. the are always only two sentences of size 2:
+
+\begin{enumerate}
+    \item $x_1, x_2 = \texttt{Hello}, STOP$
+    \item $x_1, x_2 = \texttt{Goodbye}, STOP$
+\end{enumerate}
+
+Now, the sum of all the probabilities is 1, so it is a valid language model.
+
+\clearpage
+
+\section*{Question 3}
+
+\paragraph{} Consider the task of classifying the word bass using the Naïve Bayes algorithm. The features used are bag-of-word features. Assume the following likelihoods for each word being part of a “fish” and “music” class, and equal prior probabilities for each class.
+
+\paragraph{} What class will Naïve Bayes assign to the sentence “I eat fresh bass after music lesson”? Show your work.\\
+
+\begin{tabular}{c|c|c}
+    \hline
+     & \textbf{fish} & \textbf{music} \\
+    I & 0.09 & 0.16 \\
+    eat & 0.29 & 0.06 \\
+    fresh & 0.10 & 0.05 \\
+    after & 0.07 & 0.06 \\
+    music & 0.04 & 0.15 \\
+    lesson & 0.08 & 0.11 \\
+\end{tabular}
+
+\subsection*{Answer}
+
+\paragraph{} Classes $C = \{ C_{\texttt{fish}}, C_{music} \}$.
+
+\paragraph{} Bag of words $\{\texttt{I}, \texttt{eat}, \texttt{fresh}, \texttt{after}, \texttt{music}, \texttt{lesson}\}$
+
+\paragraph{} Features $\vec{x} = [1, 1, 1, 1, 1, 1]$
+
+\paragraph{} Priors:
+
+\begin{equation}
+    \begin{split}
+        P_{prior}(C_{\texttt{fish}}) &= \frac{1}{2} \\
+        P_{prior}(C_{\texttt{music}}) &= \frac{1}{2} \\
+    \end{split}
+\end{equation}
+
+\begin{equation}
+    \begin{split}
+        P(C_{\texttt{fish}} \given \vec{x})\ \mathbin{\propto}&\ P(C_{\texttt{fish}}) \times P(\vec{x} \given C_{\texttt{fish}}) \\
+        \ \mathbin{\propto}&\ P(\texttt{I} \given C_{\texttt{fish}}) \times \\
+        &\ P(\texttt{eat} \given C_{\texttt{fish}}) \times P(\texttt{fresh}  \given C_{\texttt{fish}}) \times P(\texttt{after} \given C_{\texttt{fish}}) \times \\
+        &\ P(\texttt{music} \given C_{\texttt{fish}}) \times P(\texttt{lesson} \given C_{\texttt{fish}}) \\
+        \ \mathbin{\propto}&\ 0.5 \times 0.09 \times 0.29 \times 0.10 \times 0.07 \times 0.04 \times 0.98 \\
+        \ \mathbin{\propto}&\ 2.9232e-7
+    \end{split}
+\end{equation}
+
+\begin{equation}
+    \begin{split}
+        P(C_{\texttt{music}} \given \vec{x})\ \mathbin{\propto}&\ P(C_{\texttt{music}}) \times P(\vec{x} \given C_{\texttt{music}}) \\
+        \ \mathbin{\propto}&\ P(\texttt{I} \given C_{\texttt{music}}) \times \\
+        &\ P(\texttt{eat} \given C_{\texttt{music}}) \times P(\texttt{fresh} \given C_{\texttt{music}}) \times P(\texttt{after} \given C_{\texttt{music}}) \times \\
+        &\ P(\texttt{music} \given C_{\texttt{music}}) \times P(\texttt{lesson} \given C_{\texttt{music}}) \\
+        \ \mathbin{\propto}&\ 0.5 \times 0.16 \times 0.06 \times 0.05 \times 0.06 \times 0.15 \times 0.11 \\
+        \ \mathbin{\propto}&\ 2.376e-7
+    \end{split}
+\end{equation}
+
+Since $P(C_{\texttt{fish}} \given \vec{x}) > P(C_{\texttt{music}} \given \vec{x})$, the class assigned is $C_{\texttt{fish}}$.
+
+\end{document}
