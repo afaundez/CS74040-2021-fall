@@ -21,6 +21,9 @@ class Encoder(set):
         if isinstance(index_or_indexes, int):
             return self.values[index_or_indexes] 
         return [ self.values[index] for index in index_or_indexes ]
+    
+    def summary(self, size=10):
+        print({ 'Encoder' : { 'size': self.size, 'indexes': self.indexes } })
 
 
 class Document(list):
@@ -70,26 +73,29 @@ class Document(list):
                             self.token_count[subtoken] = 0
                             self.unknown_tokens.add(subtoken)
                         self.token_count[subtoken] += 1
+    
+    def summary(self, size=10):
+        print({ 'Corpus' : { 'known_tokens': self.known_tokens, 'unknown_tokens': self.unknown_tokens } })
 
 
-class Corpus:
-    def __init__(self, path_pattern, vocabulary, labeler):
+class Corpus(list):
+    def __init__(self, path_pattern, vocabulary, labeler, verbose=False):
         self.vocabulary = vocabulary
         self.labeler = labeler
-        self.documents = []
-        self.size = len(self.documents)
         self.labels = []
         self.known_tokens = set()
         self.unknown_tokens  = set()
         self.token_count = [0] * vocabulary.size
-        self.load(path_pattern)
+        super().__init__([])
+        self.load(path_pattern, verbose=verbose)
+        self.size = len(self)
 
-    def load(self, path_pattern, verbose=True):
+    def load(self, path_pattern, verbose=False):
         for path in glob.glob(path_pattern):
             label = path.split('/')[-2]
             self.labels.append(label)
             new_document = Document.open(path, self.vocabulary)
-            self.documents.append(new_document)
+            self.append(new_document)
             self.known_tokens = self.known_tokens.union(new_document.known_tokens)
             self.unknown_tokens = self.unknown_tokens.union(new_document.unknown_tokens)
             for token, count in new_document.token_count.items():
@@ -97,9 +103,11 @@ class Corpus:
                     continue
                 token_id = self.vocabulary.encode(token)
                 self.token_count[token_id] += count
-            if verbose and len(self.documents) % 1000 == 0:
-                print('load:', len(self.documents), 'loaded')
-        self.size = len(self.documents)
+            if verbose and len(self) % 1000 == 0:
+                print('Corpus.load:', len(self), 'loaded')
+    
+    def summary(self, size=10):
+        print({ 'Corpus' : { 'known_tokens': self.known_tokens, 'unknown_tokens': self.unknown_tokens } })
 
 
 class Utils:
@@ -157,13 +165,19 @@ class NB:
             posterior *= self.likelihood(token, label) ** document.count(token)
         return posterior
     
-    def argmax(self, document, verbose=True):
+    def argmax(self, document, verbose=False):
         posteriors = [ self.posterior(label, document) for label in self.labeler ]
         if verbose:
-            print('posteriors:', posteriors)
+            print({ 'NB.posteriors': posteriors })
         return Utils.argmax(posteriors)
 
-    def predict(self, document_or_documents):
-        if isinstance(document_or_documents, Document):
-            return self.argmax(document_or_documents)
-        return [ self.argmax(document) for document in document_or_documents ]
+    def predict(self, document_or_corpus, verbose=False):
+        if isinstance(document_or_corpus, str):
+            document = Document.parse(document_or_corpus, self.vocabulary)
+            return self.argmax(document)
+        elif isinstance(document_or_corpus, Document):
+            return self.argmax(document_or_corpus)
+        return [ self.argmax(document, verbose) for document in document_or_corpus ]
+    
+    def summary(self, size=10):
+        print({ 'NB' : { 'priors': self.priors, 'likelihoods': self.likelihoods } })
