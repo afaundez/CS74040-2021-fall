@@ -1,17 +1,8 @@
-from NB import Encoder, Document, Corpus, NB
-
-class Metrics:
-    def score(true_labels, pred_labels):
-        tp = 0
-        fp = 0
-        for true_label, pred_label in zip(true_labels, pred_labels):
-            if true_label == pred_label:
-                tp += 1
-            else:
-                fp += 1
-        accuracy = tp / (tp + fp)
-        print({ 'Metrics.score': { 'accuracy': accuracy } })
-
+from src.encoder import Encoder
+from src.corpus import Corpus
+from src.document import Document
+from src.model import Model
+from src.metrics import Metrics
 
 if __name__ == '__main__':
     labeler = Encoder(['action', 'comedy'])
@@ -23,7 +14,7 @@ if __name__ == '__main__':
     train_corpus = Corpus('movie-review-small/aclImdb/train/**/*.txt', vocabulary, labeler, verbose=True)
     train_corpus.summary()
 
-    model = NB(vocabulary, labeler)
+    model = Model(vocabulary, labeler)
     model.fit(train_corpus, train_corpus.labels)
     model.summary()
 
@@ -48,13 +39,12 @@ if __name__ == '__main__':
 
     Metrics.score(test_corpus.labels, labeler.decode(predictions))
 
-
     labeler = Encoder(['pos', 'neg'])
     labeler.summary()
 
     vocabulary = Encoder.open('movie-review-HW2/aclImdb/imdb.vocab')
     train_corpus = Corpus('movie-review-HW2/aclImdb/train/**/*.txt', vocabulary, labeler, verbose=True)
-    model = NB(vocabulary, labeler)
+    model = Model(vocabulary, labeler)
     model.fit(train_corpus, train_corpus.labels)
 
     document = Document.open('movie-review-HW2/aclImdb/test/pos/0_10.txt', vocabulary)
