@@ -12,6 +12,7 @@ class Metrics:
         accuracy = tp / (tp + fp)
         print({ 'Metrics.score': { 'accuracy': accuracy } })
 
+
 if __name__ == '__main__':
     labeler = Encoder(['action', 'comedy'])
     labeler.summary()
@@ -26,8 +27,8 @@ if __name__ == '__main__':
     model.fit(train_corpus, train_corpus.labels)
     model.summary()
 
-    # document = Document.parse('furious,couple', vocabulary)
-    # prediction = model.predict(document)
+    # document = Document.parse(' '.join(vocabulary), vocabulary)
+    # prediction = model.predict(document, verbose=True)
     # print(f'predict({document})', prediction, labeler.decode(prediction))
 
     # document = 'couple,fly,fast'
@@ -46,7 +47,6 @@ if __name__ == '__main__':
     model.summary()
 
     Metrics.score(test_corpus.labels, labeler.decode(predictions))
-
 
 
     labeler = Encoder(['pos', 'neg'])
