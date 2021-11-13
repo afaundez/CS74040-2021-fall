@@ -7,3 +7,8 @@ class Utils:
                 max_index = index
                 max_value = value
         return max_index
+
+    def loggify(text, log=True):
+        if log:
+            return f'log_2({text})'
+        return text

@@ -18,5 +18,22 @@ class Encoder(set):
             return self.values[index_or_indexes] 
         return [ self.values[index] for index in index_or_indexes ]
     
-    def summary(self, size=10):
-        print({ 'Encoder' : { 'size': self.size, 'indexes': self.indexes } })
+    def __str__(self) -> str:
+        if len(self) < 10:
+            sample = list(self)
+        else:
+            sample = []
+            for index, token in enumerate(self):
+                sample.append(token)
+                if index == 5:
+                    sample.append('...')
+                if index == 10:
+                    break
+        return f'Encoder({", ".join(sample)})'
+    
+    def summary(self, verbose=False):
+        data = { 'Encoder' : { 'size': self.size } }
+        if verbose:
+            data['Encoder']['values'] = self.values
+            data['Encoder']['indexes'] = self.indexes
+        print(data)

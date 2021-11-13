@@ -1,0 +1,5 @@
+{"frequencies": {"fun": 1, "couple": 1, "love": 1}, "label": "comedy"}
+{"frequencies": {"couple": 1, "fly": 1, "fast": 1, "fun": 1}, "label": "comedy"}
+{"frequencies": {"fast": 1, "furious": 1, "shoot": 1}, "label": "action"}
+{"frequencies": {"fly": 1, "fast": 1, "shoot": 1, "love": 1}, "label": "action"}
+{"frequencies": {"furious": 1, "shoot": 1, "fun": 1}, "label": "action"}
