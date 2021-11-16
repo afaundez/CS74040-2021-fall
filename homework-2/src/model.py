@@ -1,8 +1,9 @@
 import math
-from src.document import Document
-from src.matrix import Matrix
-from src.vector import Vector
-from src.utils import Utils
+from src.structures.document import Document
+from src.structures.matrix import Matrix
+from src.structures.vector import Vector
+from src.utils.processors import argmax, loggify
+from src.utils.decorators import incremental
 
 class Model:
     def __init__(self, vocabulary, labeler, log=False):
@@ -11,11 +12,12 @@ class Model:
         self.log = log
         self.events_by_label = Vector(self.labeler, default=0, name='c(C)')
         self.events_by_label_by_token = Matrix(self.labeler, self.vocabulary, default=0, name='c(t,C)')
-        self.priors = Vector(self.labeler, name=Utils.loggify('p(C)', self.log))
-        self.likelihoods = Matrix(self.labeler, self.vocabulary, name=Utils.loggify('P(t|C)', self.log))
+        self.priors = Vector(self.labeler, name=loggify('p(C)', self.log))
+        self.likelihoods = Matrix(self.labeler, self.vocabulary, name=loggify('P(t|C)', self.log))
     
-    def fit(self, documents, labels, verbose=False):
-        for index, (document, label) in enumerate(zip(documents, labels)):
+
+    def fit(self, documents, labels, **kwargs):
+        for document, label in self.fit_generator(documents, labels, **kwargs):
             label_index = self.labeler.encode(label)
             self.events_by_label[label_index] += 1
             for token in document:
@@ -23,8 +25,11 @@ class Model:
                     token_index = self.vocabulary.encode(token)
                     token_count = document.count(token)
                     self.events_by_label_by_token[label_index, token_index] += token_count
-            if verbose and index % 1000 == 0:
-                print(index, 'documents fitted')
+    
+    @incremental('documents fitted')
+    def fit_generator(self, documents=[], labels=[], **kwargs):
+        yield from zip(documents, labels)
+
 
     def prior(self, label):
         label_index = self.labeler.encode(label)
@@ -54,24 +59,25 @@ class Model:
                 posterior *= self.likelihood(token, label) ** document.count(token)
         return posterior
     
-    def labelize(self, document, verbose=False):
+    def labelize(self, document, verbose=False, debug=False):
         posteriors = Vector(self.labeler, data=[ self.posterior(label, document) for label in self.labeler ], name='p(C|d)')
-        if verbose:
+        if debug:
             print(posteriors)
-        return Utils.argmax(posteriors)
+        return argmax(posteriors)
 
-    def predict(self, document_or_corpus, verbose=False):
+    def predict(self, document_or_corpus, **kwargs):
         if isinstance(document_or_corpus, str):
             document = Document.parse(document_or_corpus, self.vocabulary)
-            return self.labelize(document, verbose)
+            return self.labelize(document, **kwargs)
         elif isinstance(document_or_corpus, Document):
-            return self.labelize(document_or_corpus, verbose)
-        results = []
+            return self.labelize(document_or_corpus, **kwargs)
+        else:
+            return [item for item in self.generate_predictions(document_or_corpus, **kwargs)]
+    
+    @incremental('documents predicted')
+    def generate_predictions(self, document_or_corpus, **kwargs):
         for document in document_or_corpus:
-            results.append(self.labelize(document))
-            if verbose and len(results) % 1000 == 0:
-                print(len(results), 'documents predicted')
-        return results
+            yield self.labelize(document, **kwargs)
     
     def __str__(self):
         return f'Model(vocabulary={self.vocabulary}, labeler={self.labeler})'

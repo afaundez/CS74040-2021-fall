@@ -1,11 +1,11 @@
 class Encoder(set):
-    def open(path):
+    def open(path, include=[], exclude=[]):
         with open(path, mode='r', encoding='utf-8') as file:
             tokens = [ line.strip() for line in file ]
-            return Encoder(tokens)
-    
-    def __init__(self, values=[]):
-        super().__init__(values)
+            return Encoder(tokens, include, exclude)
+   
+    def __init__(self, values=[], include=[], exclude=[]):
+        super().__init__([ value for value in values + include if value not in exclude ])
         self.indexes = { value: index for index, value in enumerate(self) }
         self.values = { index: value for value, index in self.indexes.items() }
         self.size = len(self)
@@ -26,14 +26,5 @@ class Encoder(set):
             for index, token in enumerate(self):
                 sample.append(token)
                 if index == 5:
-                    sample.append('...')
-                if index == 10:
                     break
-        return f'Encoder({", ".join(sample)})'
-    
-    def summary(self, verbose=False):
-        data = { 'Encoder' : { 'size': self.size } }
-        if verbose:
-            data['Encoder']['values'] = self.values
-            data['Encoder']['indexes'] = self.indexes
-        print(data)
+        return f'Encoder(tokens={len(self)}, sample={sample})'
