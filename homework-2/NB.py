@@ -4,50 +4,52 @@ from src.encoder import Encoder
 from src.structures.corpus import Corpus
 from src.model import Model
 from src.metrics import Metrics
-from src.data import text_helpers
 
 # python3 NB.py \
-#     --input-train=movie-review-HW2/aclImdb/train-1grams.NB \
-#     --input-test=movie-review-HW2/aclImdb/test-1grams.NB \
-#     --use-train-vocabulary=True \
-#     --use-imdb-vocab=True \
-#     --extra-vocabulary=''
+#     --training-file=movie-review-HW2/aclImdb/train-1grams.NB \
+#     --test-file=movie-review-HW2/aclImdb/test-1grams.NB \
+#     --output-file=movie-review-HW2/aclImdb/test-1grams.NB.output \
+#     --vocabulary-file=movie-review-HW2/aclImdb/imdb.vocab \
+#     --use-train-vocabulary
 
 def parse_options():
     parser = OptionParser()
-    parser.add_option("--input-train", dest="input_train", default='movie-review-HW2/aclImdb/train-1grams.NB')
-    parser.add_option("--input-test", dest="input_test", default='movie-review-HW2/aclImdb/test-1grams.NB')
-    parser.add_option("--use-train-vocabulary", dest="use_train_vocabulary", default='True')
-    parser.add_option("--use-imdb-vocab", dest="use_imdb_vocab", default='True')
-    parser.add_option("--extra-vocabulary", dest="extra_vocabulary", default='')
-    parser.add_option("--limit-predictions", dest="limit_predictions", default='')
+    parser.add_option("--training-file", dest="training_file", default='movie-review-HW2/aclImdb/train-1grams.NB')
+    parser.add_option("--test-file", dest="test_file", default='movie-review-HW2/aclImdb/test-1grams.NB')
+    parser.add_option("--output-file", dest="output_file", default='<test-file>.output')
+
+    parser.add_option("--vocabulary-file", dest="vocabulary_file", default='movie-review-HW2/aclImdb/imdb.vocab')
+    parser.add_option("--add-token", default=[], dest="extra_vocabulary", action="append")
+    parser.add_option("--limit-predictions", dest="limit_predictions", default=None, type=int)
+    
+    parser.add_option("--use-train-vocabulary", default=False, action="store_true", dest="use_train_vocabulary")
+
     (options, args) = parser.parse_args()
-    options = {
-        'input-train': options.input_train,
-        'input-test': options.input_test,
-        'use-train-vocabulary': options.use_train_vocabulary == 'True',
-        'use-imdb-vocab': options.use_imdb_vocab == 'True',
-        'extra-vocabulary': options.extra_vocabulary.split(','),
-        'limit-predictions': int(options.limit_predictions) if options.limit_predictions != '' else None
-    }
-    options['results_path'] = f'{options["input-test"]}.output'
+
+    if options.output_file == '<test-file>.output':
+        options.output_file = f'{options.test_file}.output'
+
+    for option in options.__dict__:
+        print(f'{option}: {options.__dict__[option]}')
+
     return options
 
 def main():
     options = parse_options()
 
-    if options['use-imdb-vocab']:
-        include = options['extra-vocabulary']
-        vocabulary = Encoder.open('movie-review-HW2/aclImdb/imdb.vocab', include=include)
+    if options.vocabulary_file:
+        include = options.extra_vocabulary
+        vocabulary = Encoder.open(options.vocabulary_file, include=include)
         print(vocabulary)
     else:
         vocabulary = None
 
-    train_corpus = Corpus.open(options['input-train'], frequencies=True, verbose=True)
-    test_corpus = Corpus.open(options['input-test'], frequencies=True, verbose=True)
+    train_corpus = Corpus.open(options.training_file, frequencies=True, verbose=True)
+    test_corpus = Corpus.open(options.test_file, frequencies=True, verbose=True)
 
-    if not options['use-imdb-vocab'] or options['use-train-vocabulary']:
-        vocabulary = Encoder(list(train_corpus.frequencies.keys()))
+    if not options.vocabulary_file or options.use_train_vocabulary:
+        train_labels = list(train_corpus.frequencies.keys())
+        vocabulary = Encoder(train_labels)
 
     train_labels = list(dict.fromkeys(train_corpus.labels()))
     labeler = Encoder(train_labels)
@@ -55,19 +57,19 @@ def main():
     model = Model(vocabulary, labeler, log=True)
     model.fit(train_corpus, train_corpus.labels(), verbose=True)
 
-    predictions = model.predict(test_corpus.documents(limit=options['limit-predictions']), verbose=True, debug=False)
-    score = Metrics.score(test_corpus.labels(limit=options['limit-predictions']), labeler.decode(predictions), labeler)
+    predictions = model.predict(test_corpus.documents(limit=options.limit_predictions), verbose=True, debug=False)
+    score = Metrics.score(test_corpus.labels(limit=options.limit_predictions), labeler.decode(predictions), labeler)
     print(score)
 
-    with open(options["results_path"], 'w') as file:
-        file.write(f'{score}\n\n')
+    with open(options.output_file, 'w') as file:
+        file.write(f'{options}\n\n')
         file.write(f'{labeler}\n\n')
         file.write(f'{vocabulary}\n\n')
         file.write(f'{train_corpus}\n\n')
         file.write(f'{test_corpus}\n\n')
         file.write(f'{model}\n\n')
         print(score['confusion'], file=file)
-        file.write(f'{options}\n\n')
+        print('accuracy', score['accuracy'], file=file)
 
     return 0
 
