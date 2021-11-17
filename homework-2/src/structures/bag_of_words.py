@@ -2,9 +2,7 @@ from itertools import chain
 from src.utils.generators import tokenize, pairwise
 
 class BagOfWords(dict):
-    def __init__(self, text_or_frequencies, bigrams=True, vocabulary=None, expansions={}, replacements={}, ignored={}, **kwargs):
-        # text_or_frequencies = list(text_or_frequencies)
-        # print(text_or_frequencies)
+    def __init__(self, text_or_frequencies, bigrams=False, vocabulary=None, expansions={}, replacements={}, ignored={}, **kwargs):
         if isinstance(text_or_frequencies, dict):
             super().__init__(text_or_frequencies)
         else:
