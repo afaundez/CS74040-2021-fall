@@ -14,6 +14,8 @@ class Model:
         self.events_by_label_by_token = Matrix(self.labeler, self.vocabulary, default=0, name='c(t,C)')
         self.priors = Vector(self.labeler, name=loggify('p(C)', self.log))
         self.likelihoods = Matrix(self.labeler, self.vocabulary, name=loggify('P(t|C)', self.log))
+        self.events_by_label_by_token_sum =  Vector(self.labeler, default=None, name='sum')
+        self.events_sum = None
     
 
     def fit(self, documents, labels, **kwargs):
@@ -30,14 +32,29 @@ class Model:
     def fit_generator(self, documents=[], labels=[], **kwargs):
         yield from zip(documents, labels)
 
+    def sum_events(self):
+        tmp_sum_events = self.events_sum
+        if tmp_sum_events is None:
+            tmp_sum_events = sum(self.events_by_label)
+            self.events_sum = tmp_sum_events
+        return tmp_sum_events
 
     def prior(self, label):
         label_index = self.labeler.encode(label)
         prior = self.priors[label_index]
         if prior is None:
-            prior = 1. * self.events_by_label[label_index] / sum(self.events_by_label)
+            prior = 1. * self.events_by_label[label_index] / self.sum_events()
             self.priors[label_index] = math.log(prior, 2) if self.log else prior
         return prior
+
+
+    def sum_events_by_label_by_token(self, label):
+        label_index = self.labeler.encode(label)
+        tmp_sum_events_by_label_by_token = self.events_by_label_by_token_sum[label_index]
+        if tmp_sum_events_by_label_by_token is None:
+            tmp_sum_events_by_label_by_token = sum(self.events_by_label_by_token[label_index])
+            self.events_by_label_by_token_sum[label_index] = tmp_sum_events_by_label_by_token
+        return tmp_sum_events_by_label_by_token
 
     def likelihood(self, token, label):
         if token not in self.vocabulary:
@@ -46,7 +63,7 @@ class Model:
         label_index = self.labeler.encode(label)
         likelihood = self.likelihoods[label_index, token_index]
         if likelihood is None:
-            likelihood = (self.events_by_label_by_token[label_index, token_index] + 1) / (sum(self.events_by_label_by_token[label_index]) + self.vocabulary.size)
+            likelihood = (self.events_by_label_by_token[label_index, token_index] + 1) / (self.sum_events_by_label_by_token(label) + self.vocabulary.size)
             self.likelihoods[label_index, token_index] = math.log(likelihood, 2) if self.log else likelihood
         return likelihood
     
