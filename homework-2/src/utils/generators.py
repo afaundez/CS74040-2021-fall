@@ -1,10 +1,15 @@
 import re
+from itertools import tee
 from src.structures.text import Text
 
 TOKEN_PATTERN = re.compile(r'\S+')
 PUNCTUATION_REGEX = re.compile(r'([\\\|¦\[\]\{\}$&®@%=~«»…½¡£₤§^`´¨#+.+,:;!?()/<>\-\+\*_"“”‘’\x08\x80-\xff\'])')
 HYPEN_REGEX = re.compile(r'(\w+)(-{2,})(\w+)')
 
+def pairwise(iterable):
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 def tokenize(text, vocabulary=None, expansions=[], replacements=[], ignored=[], **kwargs):
     text = Text(text) \

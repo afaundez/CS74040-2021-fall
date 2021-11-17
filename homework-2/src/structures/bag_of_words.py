@@ -1,13 +1,18 @@
-from src.utils.generators import tokenize
+from itertools import chain
+from src.utils.generators import tokenize, pairwise
 
 class BagOfWords(dict):
-    def __init__(self, text_or_frequencies, vocabulary=None, expansions={}, replacements={}, ignored={}, **kwargs):
+    def __init__(self, text_or_frequencies, bigrams=True, vocabulary=None, expansions={}, replacements={}, ignored={}, **kwargs):
         # text_or_frequencies = list(text_or_frequencies)
         # print(text_or_frequencies)
         if isinstance(text_or_frequencies, dict):
             super().__init__(text_or_frequencies)
         else:
             tokens = tokenize(text_or_frequencies, expansions=expansions, vocabulary=vocabulary, replacements=replacements, ignored=ignored, **kwargs)
+
+            if bigrams:
+                tokens = map(lambda pair: ' '.join(pair), pairwise(chain(['<s>'], tokens, ['</s>'])))
+            tokens = list(tokens)
             for token in tokens:
                 if token not in self:
                     self[token] = 0
