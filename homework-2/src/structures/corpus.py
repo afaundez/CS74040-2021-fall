@@ -2,7 +2,7 @@ import glob
 import json
 
 from src.structures.document import Document
-from src.tokenized_text import BagOfWords
+from src.structures.bag_of_words import BagOfWords
 from src.utils.decorators import incremental
 
 class Corpus(list):
@@ -24,9 +24,17 @@ class Corpus(list):
         else:
             yield from document_or_documents
 
+    def documents(self, limit=None):
+        for index, document in enumerate(self):
+            if limit is not None and index >= limit:
+                break
+            yield document
 
-    def labels(self):
-        return [ document.label for document in self ]
+    def labels(self, limit=None):
+        for index, document in enumerate(self):
+            if limit is not None and index >= limit:
+                break
+            yield document.label
 
     def load(self, item, label=None, **kwargs):
         if isinstance(item, Document):
