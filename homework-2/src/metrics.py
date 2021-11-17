@@ -1,12 +1,17 @@
+from src.structures.matrix import Matrix
+
 class Metrics:
-    def score(true_labels, pred_labels):
-        tp = 0
-        fp = 0
+    def score(true_labels, pred_labels, labeler):
+        labels = labeler.labels()
+        confusion = Matrix(labels, labels, default=0, name='Confusion')
         for true_label, pred_label in zip(true_labels, pred_labels):
-            if true_label == pred_label:
-                tp += 1
-            else:
-                fp += 1
-        accuracy = tp / (tp + fp)
-        results = { 'accuracy': accuracy }
+            confusion[labeler.encode(true_label), labeler.encode(pred_label)] += 1
+
+        correct = sum(confusion[i, i] for i in range(len(labels)))
+        total = sum(sum(confusion[i]) for i in range(len(labels)))
+        accuracy = 1. * correct / total
+        results = {
+            'accuracy': accuracy,
+            'confusion': confusion
+        }
         return results
