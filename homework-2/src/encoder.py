@@ -9,6 +9,9 @@ class Encoder(set):
         self.indexes = { value: index for index, value in enumerate(self) }
         self.values = { index: value for value, index in self.indexes.items() }
         self.size = len(self)
+    
+    def labels(self):
+        return list(self)
 
     def encode(self, value):
         return self.indexes[value]

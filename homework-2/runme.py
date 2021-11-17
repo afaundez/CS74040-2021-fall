@@ -1,64 +1,132 @@
+import csv
 from src.encoder import Encoder
-from src.corpus import Corpus
-from src.document import Document
+from src.structures.corpus import Corpus
 from src.model import Model
 from src.metrics import Metrics
 
-if __name__ == '__main__':
-    labeler = Encoder(['action', 'comedy'])
-    labeler.summary()
+options = {
+    'labels': ['pos', 'neg'],
+    'pre-process': [],
+    'ngrams': 2,
+    'train_input': 'movie-review-HW2/aclImdb/train/**/*.txt',
+    'test_input': 'movie-review-HW2/aclImdb/test/**/*.txt',
+    'output_path': 'movie-review-HW2/aclImdb',
+    'use_train_vocabulary': True,
+    'parse_corpus': True,
+    'use_imdb_vocab': True,
+    'include': [], #['||pos||', '||neg||', '||url||', '||email||', '||not||'],
+    'limit_predictions': None,
+}
 
-    vocabulary = Encoder.open('movie-review-small/aclImdb/imdb.vocab')
-    vocabulary.summary()
+options['output_prefix'] = '-'.join([*sorted(options['pre-process']), f'{options["ngrams"]}grams'])
+options['train_corpus_output'] = f'{options["output_path"]}/train-{options["output_prefix"]}{ "-tv" if options["use_train_vocabulary"] else "" }.NB'
+options['test_corpus_output'] = f'{options["output_path"]}/test-{options["output_prefix"]}{ "-tv" if options["use_train_vocabulary"] else "" }.NB'
+options['bigram'] = True if options['ngrams'] > 1 else False
+if options['bigram']:
+    options['use_train_vocabulary'] = True
+options['results_path'] = f'{options["output_path"]}/score-{options["output_prefix"]}{ "-tv" if options["use_train_vocabulary"] else "" }.txt'
+labeler = Encoder(options['labels'])
+print(labeler)
 
-    train_corpus = Corpus('movie-review-small/aclImdb/train/**/*.txt', vocabulary, labeler, verbose=True)
-    train_corpus.summary()
+if options['use_imdb_vocab']:
+    include = options['include']
+    vocabulary = Encoder.open('movie-review-HW2/aclImdb/imdb.vocab', include=include)
+    print(vocabulary)
+else:
+    vocabulary = None
 
-    model = Model(vocabulary, labeler)
-    model.fit(train_corpus, train_corpus.labels)
-    model.summary()
+if options['parse_corpus']:
+    with open('src/data/acronyms.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader, None)
+        acronyms = { acronym: meaning for acronym, meaning in reader }
 
-    # document = Document.parse(' '.join(vocabulary), vocabulary)
-    # prediction = model.predict(document, verbose=True)
-    # print(f'predict({document})', prediction, labeler.decode(prediction))
+    with open('src/data/smileys.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader, None)
+        smileys = { smiley: f'{labeler.decode(int(bias))}' for smiley, bias in reader }
 
-    # document = 'couple,fly,fast'
-    # prediction = model.predict(document)
-    # print(f'predict({document})', prediction, labeler.decode(prediction))
+    with open('src/data/positive-words.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile, delimiter='\t')
+        positive_words = { positive_word: f'{labeler.decode(int(bias))}' for positive_word, bias in reader }
 
-    # print('model.priors', model.priors)
-    # print('model.likelihoods', model.likelihoods)
+    with open('src/data/negative-words.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile, delimiter='\t')
+        negative_words = { negative_word: f'{labeler.decode(int(bias))}' for negative_word, bias in reader }
 
-    test_corpus = Corpus('movie-review-small/aclImdb/test/**/*.txt', vocabulary, labeler, verbose=True)
-    test_corpus.summary()
+    with open('src/data/negation.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader, None)
+        negations = { negation: token for negation, token in reader }
 
-    predictions = model.predict(test_corpus, verbose=True)
-    print(f'predict({test_corpus})', predictions, labeler.decode(predictions))
+    with open('src/data/stopwords.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader, None)
+        stopwords = { word for [word] in reader }
 
-    model.summary()
+    expansions = {}
+    if 'acronym' in options['pre-process']:
+        expansions = { **expansions, **acronyms }
 
-    Metrics.score(test_corpus.labels, labeler.decode(predictions))
+    replacements = {}
+    if 'smileys' in options['pre-process']:
+        replacements = { **replacements, **smileys}
+    if 'positive-words' in options['pre-process']:
+        replacements = { **replacements, **positive_words }
+    if 'negative-words' in options['pre-process']:
+        replacements = { **replacements, **negative_words }
+    if 'negations' in options['pre-process']:
+        replacements = { **replacements, **negations }
 
-    labeler = Encoder(['pos', 'neg'])
-    labeler.summary()
+    ignored = []
+    if 'stopwords' in options['pre-process']:
+        ignored = [*ignored, *stopwords]
 
-    vocabulary = Encoder.open('movie-review-HW2/aclImdb/imdb.vocab')
-    train_corpus = Corpus('movie-review-HW2/aclImdb/train/**/*.txt', vocabulary, labeler, verbose=True)
-    model = Model(vocabulary, labeler)
-    model.fit(train_corpus, train_corpus.labels)
+    train_corpus = Corpus.open(options['train_input'],
+        bigrams=options['bigram'],
+        vocabulary=vocabulary,
+        replacements=replacements,
+        expansions=expansions,
+        ignored=ignored,
+        verbose=True
+    )
+    print(train_corpus)
+    train_corpus.write(options['train_corpus_output'])
 
-    document = Document.open('movie-review-HW2/aclImdb/test/pos/0_10.txt', vocabulary)
-    prediction = model.predict(document, verbose=True)
-    print(prediction, labeler.decode(prediction))
+    test_corpus = Corpus.open(options['test_input'],
+        bigrams=options['bigram'],
+        vocabulary=vocabulary,
+        replacements=replacements,
+        expansions=expansions,
+        ignored=ignored,
+        verbose=True
+    )
+    print(test_corpus)
+    test_corpus.write(options['test_corpus_output'], verbose=True)
 
-    document = Document.open('movie-review-HW2/aclImdb/test/neg/0_2.txt', vocabulary)
-    prediction = model.predict(document, verbose=True)
-    print(prediction, labeler.decode(prediction))
+if not options['parse_corpus']:
+    train_corpus = Corpus.open(options['train_corpus_output'], frequencies=True, verbose=True)
+    print(train_corpus)
+    test_corpus = Corpus.open(options['test_corpus_output'], frequencies=True, verbose=True) 
+    print(test_corpus)
 
-    test_corpus = Corpus('movie-review-HW2/aclImdb/test/**/*.txt', vocabulary, labeler, verbose=True)
-    print('test_corpus.size', test_corpus.size)
+if not options['use_imdb_vocab'] or options['use_train_vocabulary']:
+    vocabulary = Encoder(list(train_corpus.frequencies.keys()))
+    print(vocabulary)
 
-    predictions = model.predict(test_corpus)
+model = Model(vocabulary, labeler, log=True)
+model.fit(train_corpus, train_corpus.labels(), verbose=True)
+print(model)
 
-    accuracy = Metrics.score(test_corpus.labels, labeler.decode(predictions))
-    print('Metrics.score', accuracy)
+predictions = model.predict(test_corpus.documents(limit=options['limit_predictions']), verbose=True, debug=False)
+score = Metrics.score(test_corpus.labels(limit=options['limit_predictions']), labeler.decode(predictions), labeler)
+print(score)
+with open(options["results_path"], 'w') as file:
+    file.write(f'{score}\n')
+    file.write(f'{labeler}\n')
+    file.write(f'{vocabulary}\n')
+    file.write(f'{train_corpus}\n')
+    file.write(f'{test_corpus}\n')
+    file.write(f'{model}\n')
+    print(score['confusion'], file=file)
+    file.write(f'{options}\n')
