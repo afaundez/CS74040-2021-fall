@@ -14,30 +14,27 @@ from src.data import text_helpers
 
 def parse_options():
     parser = OptionParser()
-    parser.add_option("--training-file", dest="training_file", default='movie-review-HW2/aclImdb/train/**/*.txt')
-    parser.add_option("--test-file", dest="test_file", default='movie-review-HW2/aclImdb/test/**/*.txt')
+    parser.add_option("--training-file", default='movie-review-HW2/aclImdb/train/**/*.txt')
+    parser.add_option("--test-file", default='movie-review-HW2/aclImdb/test/**/*.txt')
 
-    parser.add_option("--output-path", dest="output_path", default='movie-review-HW2/aclImdb')
-    parser.add_option("--output-training-file", dest="output_training_file", default='<output_path>/train-<ngram>gram-<pre-process-1>-...-<pre-process-1>.NB')
-    parser.add_option("--output-test-file", dest="output_test_file", default='<output_path>/test-<ngram>gram-<pre-process-1>-...-<pre-process-1>.NB')
+    parser.add_option("--output-path", default='movie-review-HW2/aclImdb')
+    parser.add_option("--output-training-file", default='<output_path>/train-<ngram>gram-<pre-process-1>-...-<pre-process-1>.NB')
+    parser.add_option("--output-test-file", default='<output_path>/test-<ngram>gram-<pre-process-1>-...-<pre-process-1>.NB')
 
     parser.add_option("--vocabulary-file", dest="vocabulary_file", default='movie-review-HW2/aclImdb/imdb.vocab')
 
-    
     parser.add_option("--add-label", action="append", dest="labels", default=[])
-    parser.add_option("--ngrams", dest="ngrams", default='1', type=int)
-    parser.add_option("--use-train-vocabulary", action="store_true", default=False, dest="use_train_vocabulary")
+    parser.add_option("--ngrams", default=1, type=int)
+    parser.add_option("--use-train-vocabulary", action="store_true", default=False)
 
-    parser.add_option("--add-pre-process", default=[], dest="pre_process", action="append", choices=('acronym', 'smileys', 'positive-words', 'negative-words', 'negations', 'stopwords'))
-    parser.add_option("--add-token", default=[], dest="extra_vocabulary", action="append")
+    parser.add_option("--add-pre-process", action="append", choices=('acronym', 'smileys', 'positive-words', 'negative-words', 'negations', 'stopwords'), default=[], dest="pre_process")
+    parser.add_option("--add-token", action="append", default=[], dest="extra_vocabulary")
 
     (options, args) = parser.parse_args()
 
     output_ids = [f'{str(options.ngrams)}grams', *sorted(options.pre_process)]
     output_id = '-'.join([ value for value in output_ids if value ])
     options.output_id = output_id
-
-    options.bigrams = True if options.ngrams > 1 else False # TODO: use options.ngrams
     
     if options.ngrams > 1:
         options.use_train_vocabulary = True
@@ -89,7 +86,7 @@ def main():
         ignored = [*ignored, *stopwords]
 
     train_corpus = Corpus.open(options.training_file,
-        bigrams=options.bigrams,
+        ngrams=options.ngrams,
         vocabulary=vocabulary,
         replacements=replacements,
         expansions=expansions,
@@ -100,7 +97,7 @@ def main():
     train_corpus.write(options.output_training_file)
 
     test_corpus = Corpus.open(options.test_file,
-        bigrams=options.bigrams,
+        ngrams=options.ngrams,
         vocabulary=vocabulary,
         replacements=replacements,
         expansions=expansions,

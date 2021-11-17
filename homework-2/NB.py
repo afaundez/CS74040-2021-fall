@@ -14,11 +14,11 @@ from src.metrics import Metrics
 
 def parse_options():
     parser = OptionParser()
-    parser.add_option("--training-file", dest="training_file", default='movie-review-HW2/aclImdb/train-1grams.NB')
-    parser.add_option("--test-file", dest="test_file", default='movie-review-HW2/aclImdb/test-1grams.NB')
-    parser.add_option("--output-file", dest="output_file", default='<test-file>.output')
+    parser.add_option("--training-file", default='movie-review-HW2/aclImdb/train-1grams.NB')
+    parser.add_option("--test-file", default='movie-review-HW2/aclImdb/test-1grams.NB')
+    parser.add_option("--output-file", default='<test-file>.output')
 
-    parser.add_option("--vocabulary-file", dest="vocabulary_file", default='movie-review-HW2/aclImdb/imdb.vocab')
+    parser.add_option("--vocabulary-file", default='movie-review-HW2/aclImdb/imdb.vocab')
     parser.add_option("--add-token", default=[], dest="extra_vocabulary", action="append")
     parser.add_option("--limit-predictions", dest="limit_predictions", default=None, type=int)
     
