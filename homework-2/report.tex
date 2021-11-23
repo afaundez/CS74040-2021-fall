@@ -1,0 +1,101 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{NLP Homework 2}
+\author{Álvaro Faúndez}
+\date{November 2021}
+
+\usepackage{amsmath}
+\usepackage{pgfplots}
+\pgfplotsset{width=10cm,compat=1.9}
+\usepackage{float}
+\usepackage{graphicx}
+\usetikzlibrary{calc,angles,quotes}
+\usepackage{makecell}
+
+\newcommand\given[1][]{\:#1\vert\:}
+
+\begin{document}
+
+\maketitle
+
+\section*{Part I}
+
+\paragraph{} Assume that you have trained a Naïve Bayes classifier for the task of sentiment classification (please refer to Chapter 4 in the J\&M book). The classifier uses only bag-of-word falwaysures. Assume the following parameters for each word being part of a positive or negative movie review, and the prior probabilities are 0.4 for the positive class and 0.6 for the negative class.
+
+\begin{tabular}{c|c|c}
+    \hline
+     & \textbf{pos} & \textbf{neg} \\
+    I & 0.09 & 0.16 \\
+    always & 0.07 & 0.06 \\
+    like & 0.29 & 0.06 \\
+    foreign & 0.04 & 0.15 \\
+    films & 0.08 & 0.11 \\
+\end{tabular}
+
+\paragraph{} Question: What class will Naïve Bayes assign to the sentence “I always like foreign films”? \textbf{Show your work}.
+
+\subsection*{Answer}
+
+\paragraph{} Bag of words $\{\texttt{I}, \texttt{always}, \texttt{like}, \texttt{foreign}, \texttt{films}\}$
+
+\paragraph{} Features $\vec{x} = [1, 1, 1, 1, 1, 1]$
+
+\paragraph{} Priors:
+
+\begin{equation}
+    \begin{split}
+        P_{prior}(C_{\texttt{pos}}) &= 0.4 \\
+        P_{prior}(C_{\texttt{neg}}) &= 0.6 \\
+    \end{split}
+\end{equation}
+
+\begin{equation}
+    \begin{split}
+        P(C_{\texttt{pos}} \given \vec{x})\ \mathbin{\propto}&\ P(C_{\texttt{pos}}) \times P(\vec{x} \given C_{\texttt{pos}}) \\
+        \ \mathbin{\propto}&\ [P(\texttt{I} \given C_{\texttt{pos}}) \times [P(\texttt{always} \given C_{\texttt{pos}}) \times P(\texttt{like} \given C_{\texttt{pos}}) \times \\
+        &\ P(\texttt{foreign} \given C_{\texttt{pos}}) \times P(\texttt{films} \given C_{\texttt{pos}}) ]\\
+        \ \mathbin{\propto}&\ 0.4 \times [0.09 \times 0.07 \times 0.29  \times 0.04 \times 0.08] \\
+        \ \mathbin{\propto}&\ 0.00000233856
+    \end{split}
+\end{equation}
+
+\begin{equation}
+    \begin{split}
+        P(C_{\texttt{neg}} \given \vec{x})\ \mathbin{\propto}&\ P(C_{\texttt{neg}}) \times P(\vec{x} \given C_{\texttt{neg}}) \\
+        \ \mathbin{\propto}&\ P(\texttt{I} \given C_{\texttt{neg}}) \times [P(\texttt{always} \given C_{\texttt{neg}}) \times P(\texttt{like} \given C_{\texttt{neg}}) \times \\
+        &\ P(\texttt{foreign} \given C_{\texttt{neg}}) \times P(\texttt{films} \given C_{\texttt{neg}})] \\
+        \ \mathbin{\propto}&\ 0.6 \times [0.16 \times 0.06 \times 0.06 \times 0.15 \times 0.11] \\
+        \ \mathbin{\propto}&\ 0.0000057024
+    \end{split}
+\end{equation}
+
+Since $P(C_{\texttt{neg}} \given \vec{x}) > P(C_{\texttt{pos}} \given \vec{x})$, the class assigned is $C_{\texttt{neg}}$.
+
+\clearpage
+
+\section*{Part II}
+
+\paragraph{} [Implementing the Naïve Bayes classifier for movie review classification – 90 points] In this assignment, you will write 2 scripts: NB.py and pre-process.py. NB.py should take the following parameters: the training file, the test file, the file where the parameters of the resulting model will be saved, and the output file where you will write predictions made by the classifier on the test data (one example per line). The last line in the output file should list the overall accuracy of the classifier on the test data. The training and the test files should have the following format: one example per line; each line corresponds to an example; first column is the label, and the other columns are feature values.
+
+\paragraph{} pre-process.py should take the training (or test) directory containing movie reviews, should perform pre-processing1 on each file and output the files in the vector format to be used by NB.py.
+
+\paragraph{a)} Implement in Python a Naïve Bayes classifier with bag-of-word (BOW) features and Add-one smoothing. Note: Do not use smoothing for the prior parameters. You should implement the algorithm from scratch and should not use off-the-shelf software. [35 points]
+
+\paragraph{b)} Use the following small corpus of movie reviews to train your classifier. Save the parameters of your model in a file called movie-review-small.NB (you can man- ually convert this small corpus into the vector format, so that you can run NB.py on it). [10 points]
+\paragraph{i.} fun, couple, love, love \textbf{comedy}
+\paragraph{ii.} fast, furious, shoot \textbf{action}
+\paragraph{iii.} couple, fly, fast, fun, fun \textbf{comedy}
+\paragraph{iv.} furious, shoot, shoot, fun \textbf{action}
+\paragraph{v.} fly, fast, shoot, love \textbf{action}
+
+\paragraph{c)} Test you classifier on the new document below: $\{fast,couple,shoot,fly\}$. Compute the most likely class. Report the probabilities for each class. [5 points]
+
+\paragraph{d)} Now use the movie review dataset provided with this homework to train a Naive Bayes classifier for the real task. You will train your classifier on the training data and will test it on the test data. The dataset contains movie reviews; each review is saved as a separate file in the folder “neg” or “pos” (which are located in “train” and “test” folders, respectively). You should use these raw files and represent each review using a vector of bag-of-word features, where each feature corresponds to a word from the vocabulary file (also provided), and the value of the feature is the count of that word in the review file.
+
+\paragraph{} Pre-processing: prior to building feature vectors, you should separate punctuation from words and lowercase the words in the reviews. You will train NB classifier on the training partition using the BOW features (use add-one smoothing, as we did in class). You will evaluate your classifier on the test partition. In addition to BOW features, you should experiment with additional features. In that case, please provide a description of the features in your report. Save the parameters of your BOW model in a file called movie-review-BOW.NB. Report the accuracy of your program on the test data with BOW features.
+Investigate your results. For the reviews for which your program made incorrect predictions, were there any trends that you observed? That is, can you explain why these incorrect predictions were made? [40 points]
+
+\subsection*{Answer}
+
+\end{document}
