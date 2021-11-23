@@ -5,8 +5,9 @@ PUNCTUATION_REGEX = re.compile(r'([\\\|¦\[\]\{\}$&®@%=~«»…½¡£₤§^`´�
 HYPEN_REGEX = re.compile(r'(\w+)(-{2,})(\w+)')
 
 class Document(dict):
-    def __init__(self, data, label=None, vocabulary=[], expansions={}, replacements={}, ignored=[], **kwargs):
+    def __init__(self, data, label=None, vocabulary=[], expansions={}, replacements={}, ignored=[], source=None, **kwargs):
         self.label = label
+        self.source = source
         if isinstance(data, str):
             frequencies = BagOfWords(data, vocabulary=vocabulary, expansions=expansions, replacements=replacements, ignored=ignored, **kwargs)
         elif isinstance(data, dict):

@@ -41,13 +41,13 @@ class Corpus(list):
             document = item
         elif isinstance(item, str):
             text, label = (item, label)
-            document =  Document(text, label=label, **kwargs)
+            document =  Document(text, label=label, source=text, **kwargs)
         elif isinstance(item, tuple):
-            text, label = item
-            document = Document(text, label=label, **kwargs)
+            text, label, source = item
+            document = Document(text, label=label, source=source, **kwargs)
         elif isinstance(item, dict):
-            frequencies, label = (item['frequencies'], item['label'])
-            document = Document(frequencies, label=label, **kwargs)
+            frequencies, label, source = (item['frequencies'], item['label'], item['source'])
+            document = Document(frequencies, label=label, source=source, **kwargs)
         self.append(document)
         return document
     
@@ -66,12 +66,12 @@ class Corpus(list):
             else:
                 label = filename.split('/')[-2]
                 text = open(filename).read().strip()
-                yield text, label
+                yield text, label, filename
 
     def write(self, path, **kwargs):
         with open(path, 'w') as f:
             for document in self.write_iterator(**kwargs):
-                f.write(json.dumps({ 'frequencies': document, 'label': document.label }) + '\n')
+                f.write(json.dumps({ 'frequencies': document, 'label': document.label, 'source': document.source }) + '\n')
     
     @incremental('documents written')
     def write_iterator(self, **kwargs):
