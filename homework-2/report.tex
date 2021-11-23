@@ -13,6 +13,50 @@
 \usetikzlibrary{calc,angles,quotes}
 \usepackage{makecell}
 \usepackage{booktabs}
+\usepackage[obeyspaces]{url}
+\usepackage{pythonhighlight}
+
+\usepackage{bera}% optional: just to have a nice mono-spaced font
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{eclipseStrings}{RGB}{42,0.0,255}
+\definecolor{eclipseKeywords}{RGB}{127,0,85}
+\colorlet{numb}{magenta!60!black}
+
+\lstdefinelanguage{json}{
+    basicstyle=\scriptsize\ttfamily,
+    commentstyle=\color{eclipseStrings}, % style of comment
+    stringstyle=\color{eclipseKeywords}, % style of strings
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{white}, %only if you like
+    string=[s]{"}{"},
+    comment=[l]{:\ "},
+    morecomment=[l]{:"},
+    literate=
+        *{0}{{{\color{numb}0}}}{1}
+         {1}{{{\color{numb}1}}}{1}
+         {2}{{{\color{numb}2}}}{1}
+         {3}{{{\color{numb}3}}}{1}
+         {4}{{{\color{numb}4}}}{1}
+         {5}{{{\color{numb}5}}}{1}
+         {6}{{{\color{numb}6}}}{1}
+         {7}{{{\color{numb}7}}}{1}
+         {8}{{{\color{numb}8}}}{1}
+         {9}{{{\color{numb}9}}}{1}
+}
+
+\lstset{basicstyle=\ttfamily,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue},
+  frame=single
+}
 
 \newcommand\given[1][]{\ #1\vert\ }
 
@@ -37,6 +81,8 @@
 \end{tabular}
 
 \paragraph{} Question: What class will Naïve Bayes assign to the sentence “I always like foreign films”? \textbf{Show your work}.
+
+\clearpage
 
 \subsection*{Answer}
 
@@ -99,6 +145,410 @@ Since \(P(C_{\texttt{neg}} \given \vec{x}) > P(C_{\texttt{pos}} \given \vec{x})\
 \paragraph{} Pre-processing: prior to building feature vectors, you should separate punctuation from words and lowercase the words in the reviews. You will train NB classifier on the training partition using the BOW features (use add-one smoothing, as we did in class). You will evaluate your classifier on the test partition. In addition to BOW features, you should experiment with additional features. In that case, please provide a description of the features in your report. Save the parameters of your BOW model in a file called movie-review-BOW.NB\@. Report the accuracy of your program on the test data with BOW features.
 Investigate your results. For the reviews for which your program made incorrect predictions, were there any trends that you observed? That is, can you explain why these incorrect predictions were made? [40 points]
 
+\clearpage
+
 \subsection*{Answer}
+
+\subsubsection*{The Naïve Bayes classifier}
+
+\paragraph{} The implementation of the Naive Bayes classifier is done class Model. It stores the frequencies of the training words and calculates the probabilities of the words given to predict.
+
+\paragraph{} To predict, the following steps are performed:
+
+\begin{enumerate}
+    \item Create a vocabulary and the classifications using the Encoder class. This class picks up a set of words, stores them, and assigns an index to each word, starting in 0.
+    \item Create the model, providing a vocabulary and the classifications. This will create:
+        \begin{itemize}
+            \item A matrix of frequencies of token events by classification initilized with None values, indexed by the vocabulary and the classifications encoders.
+            \item A vector of priors probabilities, initialized with zeroes, indexed by the classifications encoder.
+            \item A matrix of likelihoods probabilites initialized with zeroes, indexed by the vocabulary and the classifications encoders.
+        \end{itemize}
+        
+        \paragraph{} Other structures are also created, such as classification events and total events, but they were mostly created to avoid extra computations.
+    \item Train the model, providing a labeled training corpus. This process updates the stored frequencies.
+    \item Predict the class of a new document or corpus. The document has the following formats:
+        \begin{itemize}
+            \item A dictionary of frequencies, recongized as a single document.
+            \item A string text, recognized as a single document and transformed to a dictionary of frequencies.
+            \item A list, recognized as a list of documents. Each document could be a dictionary of frequencies or a string text.
+        \end{itemize}
+    
+    \paragraph{} Each time a prediction is requested for a document or corpus, the prior and likelihoods probabilities of the document's tokens are looked up in the prior and likelihoods matrices. If they are not present, they are calculated and stored
+\end{enumerate}
+
+\paragraph{} As requested, a preprocess script has been implemented. Given a vocabulary, a document goes through two preprocessing steps.
+
+\paragraph{} First, the text as string goes through the following steps:
+
+\begin{itemize}
+    \item URL removal
+    \item Email removal
+    \item HTML un-escaping characters
+    \item HTML rendering
+    \item Unicode characters removal
+    \item Lowercase
+\end{itemize}
+
+\paragraph{} Second, the text is tokenized is split into tokens, and goes through the following steps:
+
+\begin{itemize}
+    \item If the word is in the vocabulary, it is added to the frequencies
+    \item I the word is not in the vocabulary, the word goes through the following steps:
+        \begin{itemize}
+            \item Remove punctuation, except dashes
+            \item Remove dashes that are not linking two words
+            \item Split the word into tokens
+            \item For each token, add to the frequencies if it is in the vocabulary
+        \end{itemize}
+\end{itemize}
+
+\clearpage
+
+\subsubsection*{Training with the small corpus}
+
+\paragraph{} There are two possible classifications for each document: \textbf{action} and \textbf{comedy}.
+
+\begin{python}
+labeler = Encoder (['action', 'comedy'])
+# Encoder (tokens=2, sample=['action', 'comedy'])
+\end{python}
+
+\paragraph{} The vocabulary for this example consists in 7 words: \textbf{couple}, \textbf{furious}, \textbf{fun}, \textbf{fly}, \textbf{fast}, \textbf{shoot}, and \textbf{love}.
+
+\paragraph{} This vocabulary is stored in the file \url{homework-2/movie-review-small/aclImdb/imdb.vocab}\@.
+
+\begin{python}
+vocabulary = Encoder.open('movie-review-small/aclImdb/imdb.vocab')
+# Encoder(tokens=7, sample=['couple', 'love', 'fast', 'shoot', 'furious', 'fly', 'fun'])
+\end{python}
+
+\paragraph{} The training corpus is composed of 5 documents, stored at:
+
+\begin{itemize}
+\item \url{homework-2/movie-review-small/aclImdb/train/action/}
+\item \url{homework-2/movie-review-small/aclImdb/train/comedy/}
+\end{itemize}
+
+\begin{python}
+train_corpus = Corpus.open('movie-review-small/aclImdb/train/**/*.txt', vocabulary=vocabulary, verbose=True)
+# Corpus(documents=5, tokens=7, words=20)
+\end{python}
+
+\paragraph{} Now, it's possible to save the corpus frequencies into a file, storing the frequencies of each document and the classification as a JSON document per line:
+
+\begin{python}
+train_corpus.write('movie-review-small/aclImdb/train.NB', verbose=True)
+\end{python}
+
+\paragraph{} This is the content of \url{movie-review-small/aclImdb/train.NB}:
+
+\begin{lstlisting}[language=json,firstnumber=1]
+{"frequencies": {"fun": 1, "couple": 1, "love": 2}, "label": "comedy"}
+{"frequencies": {"couple": 1, "fly": 1, "fast": 1, "fun": 2}, "label": "comedy"}
+{"frequencies": {"fast": 1, "furious": 1, "shoot": 1}, "label": "action"}
+{"frequencies": {"fly": 1, "fast": 1, "shoot": 1, "love": 1}, "label": "action"}
+{"frequencies": {"furious": 1, "shoot": 2, "fun": 1}, "label": "action"}
+\end{lstlisting}
+
+\paragraph{} Now, the model is trainied using the training corpus:
+
+\begin{python}
+model = Model(vocabulary, labeler, log=True)
+model.fit(train_corpus, train_corpus.labels())
+model.summary()
+\end{python}
+
+\paragraph{} The summary prints debugging information, in this case, the matrices and vectors stored within the model:
+
+\begin{itemize}
+\item Events by label:
+\begin{python}
+c(C)   | value
+-------+------
+action |     3
+comedy |     2
+\end{python}
+\item Events by token and label:
+\begin{python}
+c(t,C) | couple | love | fast | shoot | furious | fly | fun
+-------+--------+------+------+-------+---------+-----+----
+action |      0 |    1 |    2 |     4 |       2 |   1 |   1
+comedy |      2 |    2 |    1 |     0 |       0 |   1 |   3
+\end{python}
+\item Prior probabilities:
+\begin{python}
+p(C)   | value
+-------+------
+action |  None
+comedy |  None
+\end{python}
+\item Likelihoods probabilities:
+\begin{python}
+P(t|C) | couple | love | fast | shoot | furious |  fly |  fun
+-------+--------+------+------+-------+---------+------+-----
+action |   None | None | None |  None |    None | None | None
+comedy |   None | None | None |  None |    None | None | None
+\end{python}
+\end{itemize}
+
+\clearpage
+
+\subsubsection*{Predicting with the small corpus}
+
+\paragraph{} Now, predictions can be made for a new document:
+
+\begin{python}
+result = model.predict(Document('fast,couple,shoot,fly'), debug=True)
+\end{python}
+
+\paragraph{} When debugging, it outputs the posterior probabilites for each class:
+
+\begin{python}
+p(C|d) |                  value
+-------+-----------------------
+action | 0.00017146776406035664
+comedy |  7.324218750000001e-05
+\end{python}
+
+\paragraph{} And the output is 0, that decoded means \textbf{action}:
+
+\begin{python}
+print(labeler.decode(prediction))
+# action
+\end{python}
+
+Finally, the model internal probabilities must have changed:
+
+\begin{itemize}
+\item Prior probabilities:
+\begin{python}
+p(C)   | value
+-------+------
+action |   0.6
+comedy |   0.4
+\end{python}
+\item Likelihoods probabilities:
+\begin{python}
+P(t|C) |   couple | love |    fast |    shoot | furious |     fly |  fun
+-------+----------+------+---------+----------+---------+---------+-----
+action | 0.055... | None | 0.16... | 0.277... |    None | 0.11... | None
+comedy |   0.1875 | None |   0.125 |   0.0625 |    None |   0.125 | None
+\end{python}
+\end{itemize}
+
+There are still None values, but that's normal because those words didn't need a prediction yet.
+
+\clearpage
+
+\subsubsection*{Testing and predicting with the IMDB reviews corpus}
+
+The process is exactly the same as before, but the corpus is now the IMDB reviews corpus.
+
+\paragraph{} There are two possible classifications for each document: \textbf{pos} and \textbf{neg}.
+\begin{python}
+labeler = Encoder(['pos', 'neg'])
+# Encoder(tokens=2, sample=['pos', 'neg'])
+\end{python}
+
+\paragraph{} And the vocabulary consists of 89,527 tokens:
+
+\begin{python}
+vocabulary = Encoder.open('movie-review-HW2/aclImdb/imdb.vocab')
+# Encoder(tokens=89527, sample=['redux', 'jaubert', 'pantangeli', 'overwatched', 'braun', 'abstractions'])
+\end{python}
+
+\paragraph{} The training and testing copurs contain 25,000 documents each:
+
+\begin{python}
+    train_corpus = Corpus.open('movie-review-HW2/aclImdb/train/**/*.txt',
+    vocabulary=vocabulary,
+    verbose=True
+)
+print(train_corpus)
+train_corpus.write('movie-review-HW2/aclImdb/train-BOW.NB', verbose=True)
+# Corpus(documents=25000, tokens=87884, words=5871238))
+\end{python}
+
+\begin{python}
+    test_corpus = Corpus.open('movie-review-HW2/aclImdb/test/**/*.txt',
+    vocabulary=vocabulary,
+    verbose=True
+)
+print(test_corpus)
+test_corpus.write('movie-review-HW2/aclImdb/test-BOW.NB', verbose=True)
+# Corpus(documents=25000, tokens=77976, words=5750635))
+\end{python}
+
+\paragraph{} This part of the process takes about 2~3 minutes, then it's more efficient to load the stored \texttt{.NB} files, especially while debugging the predictions.
+
+\begin{python}
+train_corpus = Corpus.open('movie-review-HW2/aclImdb/train-BOW.NB', frequencies=True, verbose=True)
+test_corpus = Corpus.open('movie-review-HW2/aclImdb/test-BOW.NB', frequencies=True, verbose=True)
+\end{python}
+
+\paragraph{} Predicting the test corpus labels takes no more that 8~10 seconds:
+
+\begin{python}
+model = Model(vocabulary, labeler, log=True)
+model.fit(train_corpus, train_corpus.labels(), verbose=True)
+\end{python}
+
+\paragraph{} A Metrics module is provided to calculate the accuracy and the confusion matrix:
+
+\begin{python}
+predictions = model.predict(test_corpus, verbose=True, debug=False)
+score = Metrics.score(test_corpus.labels(), labeler.decode(predictions), labeler)
+print(score)
+# {'accuracy': 0.81464, 'confusion': [[9325, 3175], [1459, 11041]]}
+\end{python}
+
+\subsubsection*{Analizing the results}
+
+The confusion matrix obtained goes as follows:
+
+\begin{python}
+true\predicted |  pos |   neg
+---------------+------+------
+           pos | 9343 |  3157
+           neg | 1531 | 10969
+\end{python}
+
+There are 3157 false negatives and 1531 false positives.
+
+\paragraph{False negative examples:}
+
+\begin{itemize}
+    \item This example is positive, but include lots of negations words, that may impact the prediction:
+
+    \paragraph{} \url{movie-review-HW2/aclImdb/test/pos/2823_10.txt}
+    
+    \begin{quotation}
+        I really like this show. It has drama, romance, and comedy all rolled into one. I am 28 and I am a married mother, so I can identify both with Lorelei's and Rory's experiences in the show. I have been watching mostly the repeats on the Family Channel lately, so I am not up-to-date on what is going on now. I think females would like this show more than males, but I know some men out there would enjoy it! I really like that is an hour long and not a half hour, as th hour seems to fly by when I am watching it! Give it a chance if you have never seen the show! I think Lorelei and Luke are my favorite characters on the show though, mainly because of the way they are with one another. How could you not see something was there (or take that long to see it I guess I should say)? <br /><br />Happy viewing!
+    \end{quotation}
+    
+
+    \item This review is positive, but it describes the movie's plot, which is about negative concepts:
+    
+    \paragraph{} \url{movie-review-HW2/aclImdb/test/pos/2823_10.txt}
+    
+    \begin{quotation}
+        This movie makes you think. It shows how a woman's weaknesses can result in nightmares for others. Her physically aggressive behavior is more often seen in men than women, so it made me feel even more uncomfortable to see the way the lead actress behaved. I think that women might think about this behavior, but I don't think they act on it. The dark scenes added to the sense of evil that needed to be hidden. I was relieved when the prisoners escaped. I was hopeful that the end would bring a satisfying solution, but it did not. Maybe that is more realistic. Life seems to run in the same direction instead of creating a new river bed running up hill.
+    \end{quotation}
+\end{itemize}
+
+\paragraph{False positive examples:}
+
+\begin{itemize}
+\item This example is negative, but uses sarcasm to express it:
+
+    \paragraph{} \url{movie-review-HW2/aclImdb/test/neg/240_4.txt}
+
+    \begin{quotation}
+    There must be an error. This movie belongs with "Plan 9", and a lot others as a quite entertaining, silly diversion. You\'ll never accept you like it, yet you will watch it whenever it comes out on TV. It\'s as simple as that.
+    \end{quotation}
+
+\item This review is negative, but talks in positive terms about the movie's starring actors:
+
+1420894\url{movie-review-HW2/aclImdb/test/neg/1821_4.txt}
+
+    \begin{quotation}
+    Alan Rickman \& Emma Thompson give good performances with southern/New Orleans accents in this detective flick. It's worth seeing for their scenes- and Rickman's scene with Hal Holbrook. These three actors mannage to entertain us no matter what the movie, it seems. The plot for the movie shows potential, but one gets the impression in watching the film that it was not pulled off as well as it could have been. The fact that it is cluttered by a rather uninteresting subplot and mostly uninteresting kidnappers really muddles things. The movie is worth a view- if for nothing more than entertaining performances by Rickman, Thompson, and Holbrook.
+    \end{quotation} 
+\end{itemize}
+
+\subsubsection*{Experimenting with bigrams}
+
+\paragraph{} The implementation of bigrams differs from what has been done in the previous section only in the frequency counting. After processing a document and splitting it into tokens, the frequency of each bigram is calculated by iterating the tokens in pairs. This will generate a new vocabulary.
+
+Now, the corpora must be loaded with anextra "ngrams" parameter:
+
+\begin{python}
+train_corpus = Corpus.open('movie-review-HW2/aclImdb/train/**/*.txt',
+    ngrams=2,
+    vocabulary=vocabulary,
+    verbose=True,
+)
+# Corpus(documents=25000, tokens=1420894, words=5896238))
+\end{python}
+
+\paragraph{} The number of tokens now ascends to 1420894, about twice the amount of tokens in the previous section.
+
+Using bigrams, also there is need to update the vocabulary for the model. This way, the training and fiotting goes:
+
+\begin{python}
+vocabulary = Encoder(list(train_corpus.frequencies.keys()))
+model = Model(vocabulary, labeler, log=True)
+model.fit(train_corpus, train_corpus.labels(), verbose=True)
+
+predictions = model.predict(test_corpus)
+score = Metrics.score(test_corpus.labels(), labeler.decode(predictions), labeler)
+print(score)
+# {'accuracy': 0.87928, 'confusion': [[11532, 968], [2050, 10450]]}
+\end{python}
+
+\paragraph{} The accuracy is now 0.87928, higher than the unigram accuracy.
+
+\subsubsection*{Experimenting with different preprocessing}
+
+\paragraph{} The following extra preprocessing steps are available:
+
+\begin{itemize}
+\item expand acronyms
+\item replace emoticons
+\item replace negative/positive words
+\item replace negations
+\item remove stopwords
+\end{itemize}
+
+\paragraph{} Different combinations of pre=processing were tried, but the only improvement was achieved with using the unigram model and removing stopwords, increasing the accuracy slightly from 0.8236 to 0.8236\@. Results are in \url{/movie-review-HW2/score*}\@.
+
+\clearpage
+
+\section*{How to run the code}
+
+\subsection*{Pre-process}
+
+\paragraph{} Two scripts are provided.
+
+\paragraph{} To pre-process and store the frequencies in a \.NB file:
+
+\begin{lstlisting}[language=bash]
+python3 pre-process.py \
+    --training-file='movie-review-HW2/aclImdb/train/**/*.txt' \
+    --test-file='movie-review-HW2/aclImdb/test/**/*.txt' \
+    --output-path=movie-review-HW2/aclImdb \
+    --vocabulary-file=movie-review-HW2/aclImdb/imdb.vocab \
+    --add-label=pos --add-label=neg \
+    --ngrams=1
+\end{lstlisting}
+
+\paragraph{} That will generate the files \url{train-1grams.NB} and \url{test-1grams.NB} in the selected output path \url{movie-review-HW2/aclImdb}.
+
+\paragraph{} Extra pre-processing steps can be added with the \texttt{--add-pre-process} flag:
+
+\begin{lstlisting}[language=bash]
+    python3 pre-process.py \
+    --training-file='movie-review-HW2/aclImdb/train/**/*.txt' \
+    --test-file='movie-review-HW2/aclImdb/test/**/*.txt' \
+    --output-path=movie-review-HW2/aclImdb \
+    --vocabulary-file=movie-review-HW2/aclImdb/imdb.vocab \
+    --add-label=pos --add-label=neg \
+    --ngrams=1 \
+    --add-pre-process=stopwords \
+    --add-pre-process=acronyms
+\end{lstlisting}
+
+\paragraph{} To predict using the previousliy created files:
+
+\begin{lstlisting}[language=bash]
+python3 NB.py \
+    --training-file='movie-review-HW2/aclImdb/train-1grams.NB' \
+    --test-file='movie-review-HW2/aclImdb/test-1grams.NB' \
+    --output-file='movie-review-HW2/aclImdb/test-1grams.NB.output' \
+    --vocabulary-file='movie-review-HW2/aclImdb/imdb.vocab' \
+    --use-train-vocabulary
+\end{lstlisting}
+
+\paragraph{} It will generate an output file \url{movie-review-HW2/aclImdb/score-1grams.txt} with the accuracy, confusion matrix, and debug information.
 
 \end{document}

@@ -1,5 +1,5 @@
-{"frequencies": {"fun": 1, "couple": 1, "love": 2}, "label": "comedy"}
-{"frequencies": {"couple": 1, "fly": 1, "fast": 1, "fun": 2}, "label": "comedy"}
-{"frequencies": {"fast": 1, "furious": 1, "shoot": 1}, "label": "action"}
-{"frequencies": {"fly": 1, "fast": 1, "shoot": 1, "love": 1}, "label": "action"}
-{"frequencies": {"furious": 1, "shoot": 2, "fun": 1}, "label": "action"}
+{"frequencies": {"fun": 1, "couple": 1, "love": 2}, "label": "comedy", "source": "movie-review-small/aclImdb/train/comedy/i.txt"}
+{"frequencies": {"couple": 1, "fly": 1, "fast": 1, "fun": 2}, "label": "comedy", "source": "movie-review-small/aclImdb/train/comedy/iii.txt"}
+{"frequencies": {"fast": 1, "furious": 1, "shoot": 1}, "label": "action", "source": "movie-review-small/aclImdb/train/action/ii.txt"}
+{"frequencies": {"fly": 1, "fast": 1, "shoot": 1, "love": 1}, "label": "action", "source": "movie-review-small/aclImdb/train/action/v.txt"}
+{"frequencies": {"furious": 1, "shoot": 2, "fun": 1}, "label": "action", "source": "movie-review-small/aclImdb/train/action/iv.txt"}
