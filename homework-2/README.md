@@ -19,10 +19,11 @@ python3 pre-process.py \
 ## Train and Predict
 
 ```sh
-python3 NB.py \
-    --training-file=movie-review-HW2/aclImdb/train-1grams.NB \
-    --test-file=movie-review-HW2/aclImdb/test-1grams.NB \
-    --output-file=movie-review-HW2/aclImdb/test-1grams.NB.output \
+python3 pre-process.py \
+    --training-file='movie-review-HW2/aclImdb/train/**/*.txt' \
+    --test-file='movie-review-HW2/aclImdb/test/**/*.txt' \
+    --output-path=movie-review-HW2/aclImdb \
     --vocabulary-file=movie-review-HW2/aclImdb/imdb.vocab \
-    --use-train-vocabulary
+    --add-label=pos --add-label=neg \
+    --ngrams=1
 ```

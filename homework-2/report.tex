@@ -250,7 +250,7 @@ train_corpus.write('movie-review-small/aclImdb/train.NB', verbose=True)
 {"frequencies": {"furious": 1, "shoot": 2, "fun": 1}, "label": "action"}
 \end{lstlisting}
 
-\paragraph{} Now, the model is trainied using the training corpus:
+\paragraph{} Now, the model is trained using the training corpus:
 
 \begin{python}
 model = Model(vocabulary, labeler, log=True)
@@ -317,7 +317,7 @@ print(labeler.decode(prediction))
 # action
 \end{python}
 
-Finally, the model internal probabilities must have changed:
+\paragraph{} Finally, the model internal probabilities must have changed:
 
 \begin{itemize}
 \item Prior probabilities:
@@ -336,13 +336,13 @@ comedy |   0.1875 | None |   0.125 |   0.0625 |    None |   0.125 | None
 \end{python}
 \end{itemize}
 
-There are still None values, but that's normal because those words didn't need a prediction yet.
+\paragraph{} There are still None values, but that's normal because those words didn't need a prediction yet.
 
 \clearpage
 
 \subsubsection*{Testing and predicting with the IMDB reviews corpus}
 
-The process is exactly the same as before, but the corpus is now the IMDB reviews corpus.
+The process is exactly the same as before, but the corpus is now the IMDB reviews corpus. Internally, one big changed was made: the internal parameters are now being calculated using \(\log_2\) probabilities, because preliminar trials showed accuracies no more than .51\% and improved instantly after the change.
 
 \paragraph{} There are two possible classifications for each document: \textbf{pos} and \textbf{neg}.
 \begin{python}
@@ -401,6 +401,8 @@ score = Metrics.score(test_corpus.labels(), labeler.decode(predictions), labeler
 print(score)
 # {'accuracy': 0.81464, 'confusion': [[9325, 3175], [1459, 11041]]}
 \end{python}
+
+\clearpage
 
 \subsubsection*{Analizing the results}
 
@@ -471,7 +473,7 @@ train_corpus = Corpus.open('movie-review-HW2/aclImdb/train/**/*.txt',
 # Corpus(documents=25000, tokens=1420894, words=5896238))
 \end{python}
 
-\paragraph{} The number of tokens now ascends to 1420894, about twice the amount of tokens in the previous section.
+\paragraph{} The number of tokens now ascends to 1420894, about 16 times the amount of tokens in the previous using unigram.
 
 Using bigrams, also there is need to update the vocabulary for the model. This way, the training and fiotting goes:
 
@@ -544,11 +546,35 @@ python3 pre-process.py \
 python3 NB.py \
     --training-file='movie-review-HW2/aclImdb/train-1grams.NB' \
     --test-file='movie-review-HW2/aclImdb/test-1grams.NB' \
-    --output-file='movie-review-HW2/aclImdb/test-1grams.NB.output' \
+    --output-file='movie-review-HW2/aclImdb/score-1grams.txt' \
     --vocabulary-file='movie-review-HW2/aclImdb/imdb.vocab' \
     --use-train-vocabulary
 \end{lstlisting}
 
 \paragraph{} It will generate an output file \url{movie-review-HW2/aclImdb/score-1grams.txt} with the accuracy, confusion matrix, and debug information.
+
+In the case of using bigrams, these are the commands:
+
+\begin{lstlisting}[language=bash]
+python3 pre-process.py \
+    --training-file='movie-review-HW2/aclImdb/train/**/*.txt' \
+    --test-file='movie-review-HW2/aclImdb/test/**/*.txt' \
+    --output-path=movie-review-HW2/aclImdb \
+    --vocabulary-file=movie-review-HW2/aclImdb/imdb.vocab \
+    --add-label=pos --add-label=neg \
+    --ngrams=2
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash]
+python3 pre-process.py \
+    --training-file='movie-review-HW2/aclImdb/train/**/*.txt' \
+    --test-file='movie-review-HW2/aclImdb/test/**/*.txt' \
+    --output-path=movie-review-HW2/aclImdb \
+    --vocabulary-file=movie-review-HW2/aclImdb/imdb.vocab \
+    --add-label=pos --add-label=neg \
+    --ngrams=2
+\end{lstlisting}
+
+Tested with Python 3.7.12 and 3.10.0\@. No extra libraries needed.
 
 \end{document}
